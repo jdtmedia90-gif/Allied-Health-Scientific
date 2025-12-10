@@ -1,121 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Allied Health Scientific</title>
-<style>
-body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f4f4f4; }
-header { background:#004b6b; color:white; padding:15px; display:flex; justify-content:space-between; align-items:center; }
-header h1 { margin:0; }
-nav a { color:white; margin-left:15px; text-decoration:none; font-size:18px; }
-#product-list { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:20px; padding:20px; }
-.product { background:white; padding:10px; border-radius:8px; text-align:center; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
-.product img { width:100%; border-radius:8px; cursor:pointer; }
-button { padding:10px 15px; border:none; background:#0077a8; color:white; border-radius:5px; cursor:pointer; }
-#cart-page { display:none; padding:20px; }
-#cart-table { width:100%; border-collapse:collapse; }
-#cart-table th,#cart-table td { padding:10px; border-bottom:1px solid #ccc; }
-#checkout-btn { margin-top:20px; }
-#customer-form input { padding:8px; margin:5px 0; width:100%; max-width:300px; display:block; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Allied Health Scientific</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>
-  <h1>Allied Health Scientific</h1>
-  <nav>
-    <a href="#" onclick="showProducts()">Products</a>
-    <a href="#" onclick="showCart()">Cart</a>
-  </nav>
-</header>
-
-<main id="product-page">
-  <div id="product-list"></div>
-</main>
-
-<section id="cart-page">
-  <h2>Your Quote Cart</h2>
-  <div id="customer-form">
-    <input type="text" id="cust-name" placeholder="Customer Name" required>
-    <input type="email" id="cust-email" placeholder="Email" required>
-    <input type="text" id="cust-phone" placeholder="Phone" required>
-  </div>
-  <table id="cart-table">
-    <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Line Total</th><th></th></tr></thead>
-    <tbody id="cart-body"></tbody>
-  </table>
-  <h3 id="cart-total"></h3>
-  <button id="checkout-btn" onclick="submitQuote()">Request Quote</button>
-</section>
-
-<script>
-let products = [];
-let cart = [];
-
-// Load products from Apps Script
-google.script.run.withSuccessHandler(data=>{
-  products = data;
-  displayProducts(products);
-}).getProducts();
-
-function displayProducts(list) {
-  const container = document.getElementById('product-list');
-  container.innerHTML = list.map((p,i)=>`
-    <div class="product">
-      <img src="${p.image}">
-      <h3>${p.name}</h3>
-      <p>${p.desc}</p>
-      <p><strong>$${p.price}</strong></p>
-      <input type="number" id="qty-${i}" value="1" min="1" style="width:60px; margin-bottom:10px;">
-      <button onclick="addToCart(${i})">Add to Cart</button>
+  <header>
+    <div class="logo-container">
+      <h1>Allied Health Scientific</h1>
     </div>
-  `).join('');
-}
 
-function addToCart(i) {
-  const qty = parseInt(document.getElementById(`qty-${i}`).value)||1;
-  const item = cart.find(c=>c.name===products[i].name);
-  if(item) item.qty += qty;
-  else cart.push({...products[i], qty});
-  alert('Added to cart');
-}
+    <nav class="toolbar">
+      <a href="about.html">About Us</a>
+      <a href="contact.html">Contact</a>
+    </nav>
 
-function showProducts() {
-  document.getElementById('product-page').style.display='block';
-  document.getElementById('cart-page').style.display='none';
-}
-function showCart() {
-  document.getElementById('product-page').style.display='none';
-  document.getElementById('cart-page').style.display='block';
-  renderCart();
-}
+    <input type="text" id="search" placeholder="Search products...">
+    <select id="category-filter">
+      <option value="">All Categories</option>
+    </select>
+  </header>
 
-function renderCart() {
-  const body = document.getElementById('cart-body');
-  body.innerHTML = cart.map((c,i)=>`
-    <tr>
-      <td>${c.name}</td>
-      <td>${c.qty}</td>
-      <td>$${c.price}</td>
-      <td>$${c.qty*c.price}</td>
-      <td><button onclick="removeItem(${i})">Remove</button></td>
-    </tr>
-  `).join('');
-  const total = cart.reduce((a,b)=>a+b.qty*b.price,0);
-  document.getElementById('cart-total').innerText='Order Total: $'+total;
-}
+  <main>
+    <div id="product-list"></div>
+  </main>
 
-function removeItem(i){cart.splice(i,1); renderCart();}
+  <section id="contact">
+    <h2>Contact Us</h2>
+    <p>Email: <a href="mailto:tesecumj@gmail.com">tesecumj@gmail.com</a></p>
+    <p>WhatsApp: <a href="https://wa.me/15016029197" target="_blank">+501 602-9197</a></p>
+  </section>
 
-function submitQuote() {
-  if(cart.length===0){alert('Cart is empty'); return;}
-  const name=document.getElementById('cust-name').value.trim();
-  const email=document.getElementById('cust-email').value.trim();
-  const phone=document.getElementById('cust-phone').value.trim();
-  if(!name||!email||!phone){alert('Please fill all customer info'); return;}
-  const payload = {name,email,phone,items:cart.map(c=>({name:c.name,qty:c.qty,price:c.price}))};
-  google.script.run.withSuccessHandler(()=>{alert('Quote request sent!'); cart=[]; showProducts();}).submitOrder(payload);
-}
-</script>
+  <div id="lightbox" class="hidden">
+    <span id="close">&times;</span>
+    <img id="lightbox-img" src="" alt="Product Image">
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
