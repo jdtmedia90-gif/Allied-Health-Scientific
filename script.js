@@ -1,6 +1,6 @@
 // ============ CONFIG ============
 // Replace this with the Apps Script Web App URL after you deploy (do NOT include /exec or /dev? Use the provided URL)
-const WEB_APP_URL = "REPLACE_WITH_YOUR_WEB_APP_URL"; // e.g. https://script.google.com/macros/s/AKfycbx.../exec
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby4KNN--49uttnqyLgqaJToGcBZ-9MeemMjQuegvMNzWoHqdxcacFJAsTCZVgBJgwl95w/exec"; // e.g. https://script.google.com/macros/s/AKfycbx.../exec
 
 // The Google Sheet product view URL (your existing): gviz JSON feed
 const sheetURL = "https://docs.google.com/spreadsheets/d/1gDRKAFFNtFlox6OyG8fr6y5PMRahFQLy_TQzXatJtwo/gviz/tq?tqx=out:json";
@@ -260,3 +260,4 @@ function init() {
   updateCartCount();
 }
 init();
+
