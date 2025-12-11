@@ -33,13 +33,12 @@
   <p>Subtotal: $<span id="cart-subtotal">0.00</span></p>
 
   <form id="checkoutForm">
-    <input type="hidden" name="cartData" id="cartData">
     <label>Name</label><input type="text" name="customerName" required>
     <label>Email</label><input type="email" name="customerEmail" required>
     <label>Phone</label><input type="text" name="customerPhone" required>
     <button type="submit">Checkout</button>
-    <p id="status"></p>
   </form>
+  <p id="status"></p>
 </div>
 
 <section id="contact">
@@ -58,9 +57,8 @@ const sheetURL = "https://docs.google.com/spreadsheets/d/1gDRKAFFNtFlox6OyG8fr6y
 const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4KNN--49uttnqyLgqaJToGcBZ-9MeemMjQuegvMNzWoHqdxcacFJAsTCZVgBJgwl95w/exec";
 
 let products = [];
-let cart = JSON.parse(localStorage.getItem("site_cart_v1")) || [];
+let cart = loadCart();
 
-// --- PRODUCT LOADING FROM SHEET ---
 async function loadProducts() {
   try {
     const res = await fetch(sheetURL);
@@ -80,9 +78,9 @@ async function loadProducts() {
     populateCategoryFilter();
     displayProducts(products);
     updateCartCount();
-  } catch(err) {
-    console.error("Error loading products:", err);
-    document.getElementById("product-list").innerHTML="<p>Failed to load products.</p>";
+  } catch(err){
+    console.error(err);
+    document.getElementById("product-list").innerHTML = "<p>Failed to load products.</p>";
   }
 }
 
@@ -103,7 +101,7 @@ function displayProducts(list){
   `).join("");
 
   document.querySelectorAll(".product img").forEach(img=>{
-    img.addEventListener("click", ()=>openLightbox(img.src));
+    img.addEventListener("click",()=>openLightbox(img.src));
   });
 }
 
@@ -111,23 +109,29 @@ function addToCartFromInput(id){
   const product = products.find(p=>p.id===id);
   const qtyInput = document.getElementById(`qty-${id}`);
   let qty = parseInt(qtyInput.value);
-  if(!qty || qty<1) qty=1;
+  if(!qty || qty <1) qty=1;
 
   const existing = cart.find(i=>i.id===id);
-  if(existing) existing.qty+=qty;
+  if(existing) existing.qty += qty;
   else cart.push({...product, qty});
+  
   saveCart();
+}
+
+function loadCart(){
+  const raw = localStorage.getItem("site_cart_v1");
+  return raw ? JSON.parse(raw) : [];
 }
 
 function saveCart(){
   localStorage.setItem("site_cart_v1", JSON.stringify(cart));
-  renderCart();
   updateCartCount();
+  renderCart();
 }
 
 function updateCartCount(){
   const count = cart.reduce((s,i)=>s+(i.qty||0),0);
-  document.getElementById("cart-count").textContent=count;
+  document.getElementById("cart-count").textContent = count;
 }
 
 function cartSubtotal(){
@@ -136,7 +140,12 @@ function cartSubtotal(){
 
 function renderCart(){
   const el = document.getElementById("cart-items");
-  if(cart.length===0){ el.innerHTML="<p>Your cart is empty.</p>"; document.getElementById("cart-subtotal").textContent="0.00"; return; }
+  if(cart.length===0){
+    el.innerHTML="<p>Your cart is empty.</p>";
+    document.getElementById("cart-subtotal").textContent="0.00";
+    return;
+  }
+
   el.innerHTML = cart.map(item=>`
     <div class="cart-item">
       ${item.image ? `<img src="${item.image}" alt="${item.name}">` : ""}
@@ -150,10 +159,11 @@ function renderCart(){
       </div>
     </div>
   `).join("");
+
   document.getElementById("cart-subtotal").textContent = cartSubtotal().toFixed(2);
 
   document.querySelectorAll(".qty-input").forEach(input=>{
-    input.addEventListener("change", e=>{
+    input.addEventListener("change",e=>{
       const id = e.currentTarget.dataset.id;
       const qty = Math.max(1, parseInt(e.currentTarget.value)||1);
       const item = cart.find(i=>i.id===id);
@@ -163,7 +173,7 @@ function renderCart(){
   });
 
   document.querySelectorAll(".remove-item").forEach(btn=>{
-    btn.addEventListener("click", e=>{
+    btn.addEventListener("click",e=>{
       const id = e.currentTarget.dataset.id;
       cart = cart.filter(i=>i.id!==id);
       saveCart();
@@ -174,18 +184,22 @@ function renderCart(){
 const cartBtn = document.getElementById("cart-btn");
 const cartPanel = document.getElementById("cart-panel");
 const closeCart = document.getElementById("close-cart");
-cartBtn.addEventListener("click", ()=>cartPanel.classList.add("open"));
-closeCart.addEventListener("click", ()=>cartPanel.classList.remove("open"));
+cartBtn.addEventListener("click",()=>cartPanel.classList.add("open"));
+closeCart.addEventListener("click",()=>cartPanel.classList.remove("open"));
 
-document.getElementById("category-filter").addEventListener("change", e=>{
+document.getElementById("category-filter").addEventListener("change",e=>{
   const cat = e.target.value;
   const filtered = cat ? products.filter(p=>p.category===cat) : products;
   displayProducts(filtered);
 });
 
-document.getElementById("search").addEventListener("input", e=>{
+document.getElementById("search").addEventListener("input",e=>{
   const term = e.target.value.toLowerCase();
-  const filtered = products.filter(p=>p.name.toLowerCase().includes(term) || p.desc.toLowerCase().includes(term) || p.category.toLowerCase().includes(term));
+  const filtered = products.filter(p=>
+    p.name.toLowerCase().includes(term) ||
+    p.desc.toLowerCase().includes(term) ||
+    p.category.toLowerCase().includes(term)
+  );
   displayProducts(filtered);
 });
 
@@ -207,40 +221,47 @@ function openLightbox(src){
 }
 document.getElementById("close").addEventListener("click",()=>document.getElementById("lightbox").classList.add("hidden"));
 
-// --- CHECKOUT SUBMISSION USING FETCH ---
-document.getElementById("checkoutForm").addEventListener("submit", async e=>{
+// Checkout using fetch
+document.getElementById("checkoutForm").addEventListener("submit", async function(e){
   e.preventDefault();
-  document.getElementById("status").textContent="Submitting...";
-  const formData = {
-    customerName: e.target.customerName.value,
-    customerEmail: e.target.customerEmail.value,
-    customerPhone: e.target.customerPhone.value,
-    cartData: cart
+  const payload = {
+    customerName: this.customerName.value,
+    customerEmail: this.customerEmail.value,
+    customerPhone: this.customerPhone.value,
+    cartData: cart.map(i=>({
+      id: i.id,
+      name: i.name,
+      price: i.price,
+      qty: i.qty
+    }))
   };
 
-  try{
+  const status = document.getElementById("status");
+  status.textContent = "Submitting order...";
+
+  try {
     const res = await fetch(APP_SCRIPT_URL, {
-      method:"POST",
-      body: JSON.stringify(formData)
+      method: "POST",
+      body: JSON.stringify(payload),
+      headers: { "Content-Type": "application/json" }
     });
-    if(res.ok){
-      document.getElementById("status").textContent="Order submitted successfully!";
-      cart=[];
+    const result = await res.json();
+    if(result.success){
+      status.textContent = "Order submitted successfully!";
+      cart = [];
       saveCart();
     } else {
-      document.getElementById("status").textContent="Error submitting order.";
+      status.textContent = "Error: "+result.message;
     }
   } catch(err){
-    document.getElementById("status").textContent="Error submitting order.";
+    status.textContent = "Error submitting order.";
     console.error(err);
   }
 });
 
-// --- INITIAL LOAD ---
 loadProducts();
 renderCart();
 updateCartCount();
 </script>
 </body>
 </html>
-
