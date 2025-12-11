@@ -20,24 +20,23 @@
   <select id="category-filter">
     <option value="">All</option>
   </select>
+  <button id="cart-btn">Cart (<span id="cart-count">0</span>)</button>
 </header>
 
 <main>
   <div id="product-list"></div>
 </main>
 
-<section id="checkout-section">
-  <h2>Checkout</h2>
-  <input type="text" id="customer-name" placeholder="Your Name">
-  <input type="text" id="customer-phone" placeholder="Phone or Email">
-  <button id="checkout-btn">Checkout</button>
-</section>
-
 <section id="cart-panel" class="closed">
   <button id="close-cart">Close Cart</button>
-  <h3>Cart (<span id="cart-count">0</span>)</h3>
+  <h3>Your Cart (<span id="cart-count">0</span>)</h3>
   <div id="cart-items"></div>
   <div>Subtotal: $<span id="cart-subtotal">0.00</span></div>
+
+  <h4>Checkout</h4>
+  <input type="text" id="customer-name" placeholder="Your Name">
+  <input type="text" id="customer-contact" placeholder="Phone or Email">
+  <button id="checkout-btn">Checkout</button>
 </section>
 
 <section id="contact">
@@ -51,7 +50,6 @@
   <img id="lightbox-img" src="" alt="Product Image">
 </div>
 
-<!-- Hidden form to send cart data via Apps Script (avoids CORS) -->
 <form id="checkout-form" action="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec" method="POST" target="hidden-iframe">
   <input type="hidden" name="name" id="form-name">
   <input type="hidden" name="contact" id="form-contact">
