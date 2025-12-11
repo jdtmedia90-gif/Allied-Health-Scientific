@@ -1,63 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Allied Health Scientific</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Allied Health Scientific</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <header>
-    <div class="logo-container">
-      <h1>Allied Health Scientific</h1>
-    </div>
-
-    <nav class="toolbar">
-      <a href="about.html">About Us</a>
-      <a href="contact.html">Contact</a>
-    </nav>
-
-    <input type="text" id="search" placeholder="Search products...">
-    <select id="category-filter">
-      <option value="">All</option>
-    </select>
-    <button id="cart-btn">Cart (<span id="cart-count">0</span>)</button>
-  </header>
-
-  <main>
-    <div id="product-list"></div>
-  </main>
-
-  <!-- Cart panel -->
-  <div id="cart-panel" class="closed">
-    <button id="close-cart">Close</button>
-    <h2>Your Cart</h2>
-    <div id="cart-items"></div>
-    <p>Subtotal: $<span id="cart-subtotal">0.00</span></p>
-    <div>
-      <label>Name:</label>
-      <input type="text" id="customer-name">
-    </div>
-    <div>
-      <label>Phone/Email:</label>
-      <input type="text" id="customer-phone">
-    </div>
-    <button id="checkout-btn">Checkout</button>
+<header>
+  <div class="logo-container">
+    <h1>Allied Health Scientific</h1>
   </div>
+  <nav class="toolbar">
+    <a href="about.html">About Us</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+  <input type="text" id="search" placeholder="Search products...">
+  <select id="category-filter">
+    <option value="">All</option>
+  </select>
+</header>
 
-  <section id="contact">
-    <h2>Contact Us</h2>
-    <p>Email: <a href="mailto:tesecumj@gmail.com">tesecumj@gmail.com</a></p>
-    <p>WhatsApp: <a href="https://wa.me/15016029197" target="_blank">+501 602-9197</a></p>
-  </section>
+<main>
+  <div id="product-list"></div>
+</main>
 
-  <!-- Lightbox -->
-  <div id="lightbox" class="hidden">
-    <span id="close">&times;</span>
-    <img id="lightbox-img" src="" alt="Product Image">
-  </div>
+<section id="checkout-section">
+  <h2>Checkout</h2>
+  <input type="text" id="customer-name" placeholder="Your Name">
+  <input type="text" id="customer-phone" placeholder="Phone or Email">
+  <button id="checkout-btn">Checkout</button>
+</section>
 
-  <script src="script.js"></script>
+<section id="cart-panel" class="closed">
+  <button id="close-cart">Close Cart</button>
+  <h3>Cart (<span id="cart-count">0</span>)</h3>
+  <div id="cart-items"></div>
+  <div>Subtotal: $<span id="cart-subtotal">0.00</span></div>
+</section>
+
+<section id="contact">
+  <h2>Contact Us</h2>
+  <p>Email: <a href="mailto:tesecumj@gmail.com">tesecumj@gmail.com</a></p>
+  <p>WhatsApp: <a href="https://wa.me/15016029197" target="_blank">+501 602-9197</a></p>
+</section>
+
+<div id="lightbox" class="hidden">
+  <span id="close">&times;</span>
+  <img id="lightbox-img" src="" alt="Product Image">
+</div>
+
+<!-- Hidden form to send cart data via Apps Script (avoids CORS) -->
+<form id="checkout-form" action="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec" method="POST" target="hidden-iframe">
+  <input type="hidden" name="name" id="form-name">
+  <input type="hidden" name="contact" id="form-contact">
+  <input type="hidden" name="cart" id="form-cart">
+</form>
+<iframe name="hidden-iframe" style="display:none;"></iframe>
+
+<script src="script.js"></script>
 </body>
 </html>
