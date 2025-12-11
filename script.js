@@ -1,8 +1,5 @@
 // ============ CONFIG ============
-// Replace this with the Apps Script Web App URL after you deploy (do NOT include /exec or /dev? Use the provided URL)
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby4KNN--49uttnqyLgqaJToGcBZ-9MeemMjQuegvMNzWoHqdxcacFJAsTCZVgBJgwl95w/exec"; // e.g. https://script.google.com/macros/s/AKfycbx.../exec
-
-// The Google Sheet product view URL (your existing): gviz JSON feed
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby4KNN--49uttnqyLgqaJToGcBZ-9MeemMjQuegvMNzWoHqdxcacFJAsTCZVgBJgwl95w/exec";
 const sheetURL = "https://docs.google.com/spreadsheets/d/1gDRKAFFNtFlox6OyG8fr6y5PMRahFQLy_TQzXatJtwo/gviz/tq?tqx=out:json";
 
 let products = [];
@@ -34,12 +31,12 @@ async function loadProducts() {
   }
 }
 
-// fallback id generator if sheet doesn't provide ids
+// fallback id generator
 function cryptoRandomId() {
   return Math.random().toString(36).slice(2,9);
 }
 
-// ---------- display products with Add to Cart ----------
+// ---------- display products with Add to Cart + Qty ----------
 function displayProducts(list) {
   const container = document.getElementById("product-list");
   container.innerHTML = list.map(p => `
@@ -48,26 +45,46 @@ function displayProducts(list) {
       <h3>${escapeHtml(p.name)}</h3>
       <p class="desc">${escapeHtml(p.desc)}</p>
       ${p.price ? `<p class="price">$${p.price.toFixed(2)}</p>` : ""}
+      <div class="qty-box">
+        <label>Qty:</label>
+        <input type="number" min="1" value="1" class="product-qty" data-id="${escapeHtml(p.id)}">
+      </div>
       <button class="add-cart-btn" data-id="${escapeHtml(p.id)}">Add to cart</button>
     </div>
   `).join("");
 
-  // lightbox for images
+  // lightbox
   document.querySelectorAll(".product img").forEach(img => {
     img.addEventListener("click", () => openLightbox(img.src));
   });
 
-  // wire add-to-cart buttons
+  // wire Add to Cart
   document.querySelectorAll(".add-cart-btn").forEach(btn => {
     btn.addEventListener("click", (e) => {
       const id = e.currentTarget.dataset.id;
       const prod = products.find(p => p.id === id);
-      if (prod) addToCart(prod);
+      if (!prod) return;
+
+      const qtyInput = document.querySelector(`.product-qty[data-id="${id}"]`);
+      const qty = qtyInput ? parseInt(qtyInput.value) || 1 : 1;
+
+      const existing = cart.find(i => i.id === prod.id);
+      if (existing) {
+        existing.qty = Math.min(999, existing.qty + qty);
+      } else {
+        cart.push({
+          id: prod.id,
+          name: prod.name,
+          price: Number(prod.price) || 0,
+          image: prod.image || "",
+          qty: qty
+        });
+      }
+      saveCart();
     });
   });
 }
 
-// simple escape to avoid injection in this context
 function escapeHtml(s) {
   if (!s && s !== 0) return "";
   return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -93,7 +110,6 @@ document.getElementById("category-filter").addEventListener("change", e => {
 function populateCategoryFilter() {
   const categories = [...new Set(products.map(p => p.category).filter(c => c))];
   const select = document.getElementById("category-filter");
-  // remove existing options except first
   select.querySelectorAll("option:not(:first-child)").forEach(o => o.remove());
   categories.forEach(c => {
     const opt = document.createElement("option");
@@ -113,7 +129,7 @@ document.getElementById("close").addEventListener("click", () => {
   document.getElementById("lightbox").classList.add("hidden");
 });
 
-// ---------- CART logic ----------
+// ---------- CART ----------
 function loadCart() {
   try {
     const raw = localStorage.getItem("site_cart_v1");
@@ -127,21 +143,6 @@ function saveCart() {
   updateCartCount();
   renderCart();
 }
-function addToCart(product) {
-  const existing = cart.find(i => i.id === product.id);
-  if (existing) {
-    existing.qty = Math.min(999, (existing.qty || 1) + 1);
-  } else {
-    cart.push({
-      id: product.id,
-      name: product.name,
-      price: Number(product.price) || 0,
-      image: product.image || "",
-      qty: 1
-    });
-  }
-  saveCart();
-}
 function updateCartCount() {
   const count = cart.reduce((s,i) => s + (i.qty||0), 0);
   document.getElementById("cart-count").textContent = count;
@@ -150,7 +151,7 @@ function cartSubtotal() {
   return cart.reduce((s,i) => s + (Number(i.price)||0) * (i.qty||0), 0);
 }
 
-// render cart items into panel
+// render cart items
 function renderCart() {
   const el = document.getElementById("cart-items");
   if (cart.length === 0) {
@@ -173,7 +174,6 @@ function renderCart() {
 
   document.getElementById("cart-subtotal").textContent = `$${cartSubtotal().toFixed(2)}`;
 
-  // wire quantity inputs and remove buttons
   document.querySelectorAll(".qty-input").forEach(input => {
     input.addEventListener("change", (e) => {
       const id = e.currentTarget.dataset.id;
@@ -192,7 +192,7 @@ function renderCart() {
   });
 }
 
-// ---------- cart panel open/close ----------
+// cart panel open/close
 const cartBtn = document.getElementById("cart-btn");
 const cartPanel = document.getElementById("cart-panel");
 const closeCart = document.getElementById("close-cart");
@@ -212,7 +212,7 @@ function closeCartPanel() {
   cartPanel.setAttribute("aria-hidden", "true");
 }
 
-// ---------- checkout (send to Google Apps Script) ----------
+// checkout
 document.getElementById("checkout-btn").addEventListener("click", async () => {
   if (!WEB_APP_URL || WEB_APP_URL.includes("REPLACE_WITH_YOUR_WEB_APP_URL")) {
     alert("Checkout not configured. Set WEB_APP_URL in script.js to your Apps Script Web App URL.");
@@ -233,7 +233,6 @@ document.getElementById("checkout-btn").addEventListener("click", async () => {
   };
 
   try {
-    // Send POST request to Apps Script
     const resp = await fetch(WEB_APP_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -242,7 +241,6 @@ document.getElementById("checkout-btn").addEventListener("click", async () => {
     const data = await resp.json();
     if (!resp.ok) throw new Error(data?.error || "Server error");
 
-    // success
     alert("Order sent! We'll contact you. (Response: " + (data.status || "ok") + ")");
     cart = [];
     saveCart();
@@ -253,11 +251,10 @@ document.getElementById("checkout-btn").addEventListener("click", async () => {
   }
 });
 
-// ---------- initialize ----------
+// initialize
 function init() {
   loadProducts();
   renderCart();
   updateCartCount();
 }
 init();
-
