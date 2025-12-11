@@ -5,7 +5,7 @@ const sheetURL = "https://docs.google.com/spreadsheets/d/1gDRKAFFNtFlox6OyG8fr6y
 let products = [];
 let cart = loadCart();
 
-// ---------- load products from sheet ----------
+// ---------- LOAD PRODUCTS ----------
 async function loadProducts() {
   try {
     const res = await fetch(sheetURL);
@@ -15,7 +15,7 @@ async function loadProducts() {
 
     products = rows.slice(1).map(r => ({
       id: r.c[0]?.v?.toString?.() ?? cryptoRandomId(),
-      name: r.c[1]?.v || r.c[0]?.v || "Unnamed",
+      name: r.c[1]?.v || "Unnamed",
       category: r.c[2]?.v || "",
       price: parseFloat(r.c[3]?.v) || 0,
       desc: r.c[4]?.v || "",
@@ -31,56 +31,37 @@ async function loadProducts() {
   }
 }
 
-// fallback id generator
 function cryptoRandomId() {
   return Math.random().toString(36).slice(2,9);
 }
 
-// ---------- display products with Add to Cart + Qty ----------
+// ---------- DISPLAY PRODUCTS ----------
 function displayProducts(list) {
   const container = document.getElementById("product-list");
   container.innerHTML = list.map(p => `
-    <div class="product" data-category="${escapeHtml(p.category)}" data-id="${escapeHtml(p.id)}">
+    <div class="product" data-id="${escapeHtml(p.id)}">
       ${p.image ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}">` : ''}
       <h3>${escapeHtml(p.name)}</h3>
       <p class="desc">${escapeHtml(p.desc)}</p>
       ${p.price ? `<p class="price">$${p.price.toFixed(2)}</p>` : ""}
       <div class="qty-box">
         <label>Qty:</label>
-        <input type="number" min="1" value="1" class="product-qty" data-id="${escapeHtml(p.id)}">
+        <input type="number" min="1" value="1" class="qty-input" data-id="${escapeHtml(p.id)}">
       </div>
       <button class="add-cart-btn" data-id="${escapeHtml(p.id)}">Add to cart</button>
     </div>
   `).join("");
 
-  // lightbox
   document.querySelectorAll(".product img").forEach(img => {
     img.addEventListener("click", () => openLightbox(img.src));
   });
 
-  // wire Add to Cart
   document.querySelectorAll(".add-cart-btn").forEach(btn => {
-    btn.addEventListener("click", (e) => {
+    btn.addEventListener("click", e => {
       const id = e.currentTarget.dataset.id;
       const prod = products.find(p => p.id === id);
-      if (!prod) return;
-
-      const qtyInput = document.querySelector(`.product-qty[data-id="${id}"]`);
-      const qty = qtyInput ? parseInt(qtyInput.value) || 1 : 1;
-
-      const existing = cart.find(i => i.id === prod.id);
-      if (existing) {
-        existing.qty = Math.min(999, existing.qty + qty);
-      } else {
-        cart.push({
-          id: prod.id,
-          name: prod.name,
-          price: Number(prod.price) || 0,
-          image: prod.image || "",
-          qty: qty
-        });
-      }
-      saveCart();
+      const qty = parseInt(document.querySelector(`.qty-input[data-id='${id}']`).value) || 1;
+      if (prod) addToCart(prod, qty);
     });
   });
 }
@@ -90,7 +71,7 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
 
-// ---------- search & filter ----------
+// ---------- SEARCH & FILTER ----------
 document.getElementById("search").addEventListener("input", e => {
   const term = e.target.value.toLowerCase();
   const filtered = products.filter(p =>
@@ -119,7 +100,7 @@ function populateCategoryFilter() {
   });
 }
 
-// ---------- lightbox ----------
+// ---------- LIGHTBOX ----------
 function openLightbox(src) {
   const lb = document.getElementById("lightbox");
   lb.classList.remove("hidden");
@@ -129,33 +110,40 @@ document.getElementById("close").addEventListener("click", () => {
   document.getElementById("lightbox").classList.add("hidden");
 });
 
-// ---------- CART ----------
+// ---------- CART LOGIC ----------
 function loadCart() {
   try {
     const raw = localStorage.getItem("site_cart_v1");
     return raw ? JSON.parse(raw) : [];
-  } catch (e) {
-    return [];
-  }
+  } catch(e) { return []; }
 }
 function saveCart() {
   localStorage.setItem("site_cart_v1", JSON.stringify(cart));
   updateCartCount();
   renderCart();
 }
+function addToCart(product, qty=1) {
+  const existing = cart.find(i => i.id === product.id);
+  if (existing) {
+    existing.qty = Math.min(999, existing.qty + qty);
+  } else {
+    cart.push({ id: product.id, name: product.name, price: Number(product.price), image: product.image, qty });
+  }
+  saveCart();
+}
 function updateCartCount() {
   const count = cart.reduce((s,i) => s + (i.qty||0), 0);
   document.getElementById("cart-count").textContent = count;
 }
 function cartSubtotal() {
-  return cart.reduce((s,i) => s + (Number(i.price)||0) * (i.qty||0), 0);
+  return cart.reduce((s,i) => s + (Number(i.price)||0)*(i.qty||0), 0);
 }
 
-// render cart items
+// ---------- RENDER CART ----------
 function renderCart() {
   const el = document.getElementById("cart-items");
-  if (cart.length === 0) {
-    el.innerHTML = `<p>Your cart is empty.</p>`;
+  if(cart.length===0){
+    el.innerHTML="<p>Your cart is empty.</p>";
   } else {
     el.innerHTML = cart.map(item => `
       <div class="cart-item" data-id="${escapeHtml(item.id)}">
@@ -172,87 +160,86 @@ function renderCart() {
     `).join("");
   }
 
-  document.getElementById("cart-subtotal").textContent = `$${cartSubtotal().toFixed(2)}`;
+  document.getElementById("cart-subtotal").textContent=`$${cartSubtotal().toFixed(2)}`;
 
   document.querySelectorAll(".qty-input").forEach(input => {
-    input.addEventListener("change", (e) => {
+    input.addEventListener("change", e => {
       const id = e.currentTarget.dataset.id;
-      const v = parseInt(e.currentTarget.value) || 1;
-      const it = cart.find(x => x.id === id);
-      if (it) it.qty = Math.max(1, Math.min(999, v));
+      const v = parseInt(e.currentTarget.value)||1;
+      const it = cart.find(x=>x.id===id);
+      if(it) it.qty=Math.max(1,Math.min(999,v));
       saveCart();
     });
   });
   document.querySelectorAll(".remove-item").forEach(btn => {
-    btn.addEventListener("click", (e) => {
+    btn.addEventListener("click", e => {
       const id = e.currentTarget.dataset.id;
-      cart = cart.filter(i => i.id !== id);
+      cart = cart.filter(i=>i.id!==id);
       saveCart();
     });
   });
 }
 
-// cart panel open/close
+// ---------- CART PANEL ----------
 const cartBtn = document.getElementById("cart-btn");
 const cartPanel = document.getElementById("cart-panel");
 const closeCart = document.getElementById("close-cart");
 
-cartBtn.addEventListener("click", () => openCart());
-closeCart.addEventListener("click", () => closeCartPanel());
+cartBtn.addEventListener("click", ()=>openCart());
+closeCart.addEventListener("click", ()=>closeCartPanel());
 
-function openCart() {
+function openCart(){
   cartPanel.classList.remove("closed");
   cartPanel.classList.add("open");
-  cartPanel.setAttribute("aria-hidden", "false");
+  cartPanel.setAttribute("aria-hidden","false");
   renderCart();
 }
-function closeCartPanel() {
+function closeCartPanel(){
   cartPanel.classList.remove("open");
   cartPanel.classList.add("closed");
-  cartPanel.setAttribute("aria-hidden", "true");
+  cartPanel.setAttribute("aria-hidden","true");
 }
 
-// checkout
-document.getElementById("checkout-btn").addEventListener("click", async () => {
-  if (!WEB_APP_URL || WEB_APP_URL.includes("REPLACE_WITH_YOUR_WEB_APP_URL")) {
-    alert("Checkout not configured. Set WEB_APP_URL in script.js to your Apps Script Web App URL.");
+// ---------- CHECKOUT ----------
+document.getElementById("checkout-btn").addEventListener("click", async ()=>{
+  if(!WEB_APP_URL){
+    alert("Checkout not configured.");
     return;
   }
-  if (cart.length === 0) { alert("Cart is empty."); return; }
+  if(cart.length===0){ alert("Cart is empty."); return; }
 
-  const name = document.getElementById("customer-name").value.trim();
-  const contact = document.getElementById("customer-phone").value.trim();
-  if (!name) { alert("Please enter your name."); return; }
+  const name=document.getElementById("customer-name").value.trim();
+  const contact=document.getElementById("customer-phone").value.trim();
+  if(!name){ alert("Enter your name."); return; }
 
-  const payload = {
+  const payload={
     timestamp: new Date().toISOString(),
-    customerName: name,
-    customerContact: contact,
-    items: cart.map(i => ({ id: i.id, name: i.name, price: Number(i.price), qty: i.qty })),
+    customerName:name,
+    customerContact:contact,
+    items: cart.map(i=>({id:i.id,name:i.name,price:Number(i.price),qty:i.qty})),
     subtotal: cartSubtotal()
   };
 
-  try {
-    const resp = await fetch(WEB_APP_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+  try{
+    const resp=await fetch(WEB_APP_URL,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(payload)
     });
-    const data = await resp.json();
-    if (!resp.ok) throw new Error(data?.error || "Server error");
-
-    alert("Order sent! We'll contact you. (Response: " + (data.status || "ok") + ")");
-    cart = [];
+    const data=await resp.json();
+    if(!resp.ok) throw new Error(data?.error||"Server error");
+    alert("Order sent! We'll contact you.");
+    cart=[];
     saveCart();
     closeCartPanel();
-  } catch (err) {
-    console.error("Checkout error:", err);
-    alert("Failed to send order. See console for details.");
+  }catch(err){
+    console.error("Checkout error:",err);
+    alert("Failed to send order. See console.");
   }
 });
 
-// initialize
-function init() {
+// ---------- INIT ----------
+function init(){
   loadProducts();
   renderCart();
   updateCartCount();
