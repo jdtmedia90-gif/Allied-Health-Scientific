@@ -38,7 +38,6 @@
     <label>Phone</label><input type="text" name="customerPhone" required>
     <button type="submit">Checkout</button>
   </form>
-  <p id="status"></p>
 </div>
 
 <section id="contact">
@@ -66,8 +65,8 @@ async function loadProducts() {
     const jsonData = JSON.parse(text.substring(47).slice(0, -2));
     const rows = jsonData.table.rows;
 
-    products = rows.slice(1).map((r,i)=>({
-      id: r.c[0]?.v?.toString() || "p"+i,
+    products = rows.slice(1).map((r, i) => ({
+      id: r.c[0]?.v?.toString() || "p" + i,
       name: r.c[0]?.v || "Unnamed",
       category: r.c[1]?.v || "",
       price: parseFloat(r.c[2]?.v) || 0,
@@ -78,15 +77,15 @@ async function loadProducts() {
     populateCategoryFilter();
     displayProducts(products);
     updateCartCount();
-  } catch(err){
-    console.error(err);
+  } catch (err) {
+    console.error("Error loading products:", err);
     document.getElementById("product-list").innerHTML = "<p>Failed to load products.</p>";
   }
 }
 
-function displayProducts(list){
+function displayProducts(list) {
   const container = document.getElementById("product-list");
-  container.innerHTML = list.map(p=>`
+  container.innerHTML = list.map(p => `
     <div class="product" data-category="${p.category}">
       ${p.image ? `<img src="${p.image}" alt="${p.name}">` : ""}
       <h3>${p.name}</h3>
@@ -100,45 +99,45 @@ function displayProducts(list){
     </div>
   `).join("");
 
-  document.querySelectorAll(".product img").forEach(img=>{
-    img.addEventListener("click",()=>openLightbox(img.src));
+  document.querySelectorAll(".product img").forEach(img => {
+    img.addEventListener("click", () => openLightbox(img.src));
   });
 }
 
-function addToCartFromInput(id){
-  const product = products.find(p=>p.id===id);
+function addToCartFromInput(id) {
+  const product = products.find(p => p.id === id);
   const qtyInput = document.getElementById(`qty-${id}`);
   let qty = parseInt(qtyInput.value);
-  if(!qty || qty <1) qty=1;
+  if (!qty || qty < 1) qty = 1;
 
-  const existing = cart.find(i=>i.id===id);
-  if(existing) existing.qty += qty;
+  const existing = cart.find(i => i.id === id);
+  if (existing) existing.qty += qty;
   else cart.push({...product, qty});
-  
+
   saveCart();
 }
 
-function loadCart(){
+function loadCart() {
   const raw = localStorage.getItem("site_cart_v1");
   return raw ? JSON.parse(raw) : [];
 }
 
-function saveCart(){
+function saveCart() {
   localStorage.setItem("site_cart_v1", JSON.stringify(cart));
   updateCartCount();
   renderCart();
 }
 
-function updateCartCount(){
-  const count = cart.reduce((s,i)=>s+(i.qty||0),0);
+function updateCartCount() {
+  const count = cart.reduce((s,i) => s + (i.qty||0), 0);
   document.getElementById("cart-count").textContent = count;
 }
 
-function cartSubtotal(){
-  return cart.reduce((s,i)=>s+(i.price||0)*(i.qty||0),0);
+function cartSubtotal() {
+  return cart.reduce((s,i) => s + (i.price||0)*(i.qty||0),0);
 }
 
-function renderCart(){
+function renderCart() {
   const el = document.getElementById("cart-items");
   if(cart.length===0){
     el.innerHTML="<p>Your cart is empty.</p>";
@@ -146,7 +145,7 @@ function renderCart(){
     return;
   }
 
-  el.innerHTML = cart.map(item=>`
+  el.innerHTML = cart.map(item => `
     <div class="cart-item">
       ${item.image ? `<img src="${item.image}" alt="${item.name}">` : ""}
       <div class="meta">
@@ -162,8 +161,8 @@ function renderCart(){
 
   document.getElementById("cart-subtotal").textContent = cartSubtotal().toFixed(2);
 
-  document.querySelectorAll(".qty-input").forEach(input=>{
-    input.addEventListener("change",e=>{
+  document.querySelectorAll(".qty-input").forEach(input => {
+    input.addEventListener("change", e=>{
       const id = e.currentTarget.dataset.id;
       const qty = Math.max(1, parseInt(e.currentTarget.value)||1);
       const item = cart.find(i=>i.id===id);
@@ -173,7 +172,7 @@ function renderCart(){
   });
 
   document.querySelectorAll(".remove-item").forEach(btn=>{
-    btn.addEventListener("click",e=>{
+    btn.addEventListener("click", e=>{
       const id = e.currentTarget.dataset.id;
       cart = cart.filter(i=>i.id!==id);
       saveCart();
@@ -184,6 +183,7 @@ function renderCart(){
 const cartBtn = document.getElementById("cart-btn");
 const cartPanel = document.getElementById("cart-panel");
 const closeCart = document.getElementById("close-cart");
+
 cartBtn.addEventListener("click",()=>cartPanel.classList.add("open"));
 closeCart.addEventListener("click",()=>cartPanel.classList.remove("open"));
 
@@ -203,7 +203,7 @@ document.getElementById("search").addEventListener("input",e=>{
   displayProducts(filtered);
 });
 
-function populateCategoryFilter(){
+function populateCategoryFilter() {
   const select = document.getElementById("category-filter");
   select.innerHTML='<option value="">All</option>';
   const categories = [...new Set(products.map(p=>p.category).filter(c=>c))];
@@ -219,43 +219,37 @@ function openLightbox(src){
   document.getElementById("lightbox").classList.remove("hidden");
   document.getElementById("lightbox-img").src=src;
 }
-document.getElementById("close").addEventListener("click",()=>document.getElementById("lightbox").classList.add("hidden"));
+document.getElementById("close").addEventListener("click",()=>{document.getElementById("lightbox").classList.add("hidden");});
 
-// Checkout using fetch
+// Checkout
 document.getElementById("checkoutForm").addEventListener("submit", async function(e){
   e.preventDefault();
+  const status = document.getElementById("cart-subtotal");
+  status.textContent = "Submitting...";
+
   const payload = {
     customerName: this.customerName.value,
     customerEmail: this.customerEmail.value,
     customerPhone: this.customerPhone.value,
-    cartData: cart.map(i=>({
-      id: i.id,
-      name: i.name,
-      price: i.price,
-      qty: i.qty
-    }))
+    cartData: cart.map(i => ({ id:i.id, name:i.name, price:i.price, qty:i.qty }))
   };
-
-  const status = document.getElementById("status");
-  status.textContent = "Submitting order...";
 
   try {
     const res = await fetch(APP_SCRIPT_URL, {
       method: "POST",
-      body: JSON.stringify(payload),
-      headers: { "Content-Type": "application/json" }
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
     });
-    const result = await res.json();
-    if(result.success){
-      status.textContent = "Order submitted successfully!";
+    const json = await res.json();
+    if(json.success){
+      status.textContent = `Order submitted! Total: $${json.total}`;
       cart = [];
       saveCart();
     } else {
-      status.textContent = "Error: "+result.message;
+      status.textContent = `Error submitting order: ${json.message}`;
     }
   } catch(err){
-    status.textContent = "Error submitting order.";
-    console.error(err);
+    status.textContent = `Error submitting order: ${err}`;
   }
 });
 
