@@ -3,156 +3,113 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Allied Health Scientific</title>
-<link rel="stylesheet" href="style.css">
+<title>Allied Health Scientific – Online Shop</title>
+<style>
+body { font-family: Arial, sans-serif; background:#f4f8fb; margin:0; padding:0; }
+header { background:#040B80; color:white; padding:20px; text-align:center; }
+header h1 { margin:0; }
+.toolbar a { color:white; margin:0 10px; text-decoration:none; }
+#product-list { display:flex; flex-wrap:wrap; padding:20px; gap:20px; justify-content:center; }
+.product { background:white; padding:15px; border-radius:8px; width:200px; box-shadow:0 0 10px rgba(0,0,0,0.1); text-align:center; }
+.product img { max-width:100%; cursor:pointer; }
+.qty-box { margin:10px 0; }
+#cart-panel { position:fixed; top:0; right:-400px; width:400px; height:100%; background:white; box-shadow:-3px 0 15px rgba(0,0,0,0.2); transition:0.3s; padding:20px; overflow-y:auto; }
+#cart-panel.open { right:0; }
+.cart-item { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.cart-item img { width:50px; height:50px; object-fit:cover; }
+.actions input { width:50px; }
+button { padding:10px 15px; background:#00B8E9; color:white; border:none; border-radius:6px; cursor:pointer; }
+button:hover { background:#040B80; }
+#status { margin-top:10px; font-weight:bold; text-align:center; color:#040B80; }
+</style>
 </head>
 <body>
 <header>
-  <div class="logo-container">
-    <h1>Allied Health Scientific</h1>
-  </div>
-  <nav class="toolbar">
-    <a href="about.html">About Us</a>
-    <a href="contact.html">Contact</a>
-  </nav>
-  <input type="text" id="search" placeholder="Search products...">
-  <select id="category-filter">
-    <option value="">All</option>
-  </select>
-  <button id="cart-btn">Cart (<span id="cart-count">0</span>)</button>
+<h1>Allied Health Scientific</h1>
+<button id="cart-btn">Cart (<span id="cart-count">0</span>)</button>
 </header>
 
 <main>
-  <div id="product-list"></div>
+<div id="product-list"></div>
 </main>
 
 <div id="cart-panel">
-  <button id="close-cart">Close</button>
-  <h2>Your Cart</h2>
-  <div id="cart-items"></div>
-  <p>Subtotal: $<span id="cart-subtotal">0.00</span></p>
+<button id="close-cart">Close</button>
+<h2>Your Cart</h2>
+<div id="cart-items"></div>
+<p>Subtotal: $<span id="cart-subtotal">0.00</span></p>
 
-  <form id="checkoutForm" method="POST" target="hiddenFrame">
-    <input type="hidden" name="cartData" id="cartData">
-    <label>Name</label><input type="text" name="customerName" required>
-    <label>Email</label><input type="email" name="customerEmail" required>
-    <label>Phone</label><input type="text" name="customerPhone" required>
-    <button type="submit">Checkout</button>
-  </form>
-  <iframe name="hiddenFrame" style="display:none;"></iframe>
-</div>
-
-<section id="contact">
-  <h2>Contact Us</h2>
-  <p>Email: <a href="mailto:tesecumj@gmail.com">tesecumj@gmail.com</a></p>
-  <p>WhatsApp: <a href="https://wa.me/15016029197" target="_blank">+501 602-9197</a></p>
-</section>
-
-<div id="lightbox" class="hidden">
-  <span id="close">&times;</span>
-  <img id="lightbox-img" src="" alt="Product Image">
+<form id="checkoutForm">
+<input type="hidden" name="cartData" id="cartData">
+<label>Name</label><input type="text" name="customerName" required>
+<label>Email</label><input type="email" name="customerEmail" required>
+<label>Phone</label><input type="text" name="customerPhone" required>
+<button type="submit">Checkout</button>
+<p id="status"></p>
+</form>
 </div>
 
 <script>
-const sheetURL = "https://docs.google.com/spreadsheets/d/1gDRKAFFNtFlox6OyG8fr6y5PMRahFQLy_TQzXatJtwo/gviz/tq?tqx=out:json";
-const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4KNN--49uttnqyLgqaJToGcBZ-9MeemMjQuegvMNzWoHqdxcacFJAsTCZVgBJgwl95w/exec";
+const APP_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_APP_SCRIPT_ID/exec";
 
-let products = [];
-let cart = loadCart();
+let products = [
+  {id:"p1", name:"Vitamin C", price:12.5, image:""},
+  {id:"p2", name:"Omega 3", price:20, image:""},
+  {id:"p3", name:"Protein Powder", price:35, image:""}
+];
 
-async function loadProducts() {
-  try {
-    const res = await fetch(sheetURL);
-    const text = await res.text();
-    const jsonData = JSON.parse(text.substring(47).slice(0, -2));
-    const rows = jsonData.table.rows;
+let cart = JSON.parse(localStorage.getItem("site_cart_v1")) || [];
 
-    products = rows.slice(1).map((r, i) => ({
-      id: r.c[0]?.v?.toString() || "p" + i,
-      name: r.c[0]?.v || "Unnamed",
-      category: r.c[1]?.v || "",
-      price: parseFloat(r.c[2]?.v) || 0,
-      desc: r.c[3]?.v || "",
-      image: r.c[4]?.v || ""
-    }));
-
-    populateCategoryFilter();
-    displayProducts(products);
-    updateCartCount();
-  } catch (err) {
-    console.error("Error loading products:", err);
-    document.getElementById("product-list").innerHTML = "<p>Failed to load products.</p>";
-  }
-}
-
-function displayProducts(list) {
+function renderProducts() {
   const container = document.getElementById("product-list");
-  container.innerHTML = list.map(p => `
-    <div class="product" data-category="${p.category}">
-      ${p.image ? `<img src="${p.image}" alt="${p.name}">` : ""}
+  container.innerHTML = products.map(p=>`
+    <div class="product">
+      ${p.image?`<img src="${p.image}" alt="${p.name}">`:""}
       <h3>${p.name}</h3>
-      <p class="desc">${p.desc}</p>
-      <p class="price">$${p.price.toFixed(2)}</p>
+      <p>$${p.price.toFixed(2)}</p>
       <div class="qty-box">
         <label>Qty:</label>
         <input type="number" min="1" value="1" id="qty-${p.id}">
       </div>
-      <button onclick="addToCartFromInput('${p.id}')">Add to Cart</button>
+      <button onclick="addToCart('${p.id}')">Add to Cart</button>
     </div>
   `).join("");
-
-  document.querySelectorAll(".product img").forEach(img => {
-    img.addEventListener("click", () => openLightbox(img.src));
-  });
 }
 
-function addToCartFromInput(id) {
-  const product = products.find(p => p.id === id);
+function addToCart(id){
+  const product = products.find(p=>p.id===id);
   const qtyInput = document.getElementById(`qty-${id}`);
-  let qty = parseInt(qtyInput.value);
-  if (!qty || qty < 1) qty = 1;
-
-  const existing = cart.find(i => i.id === id);
-  if (existing) existing.qty += qty;
+  let qty = parseInt(qtyInput.value)||1;
+  const existing = cart.find(i=>i.id===id);
+  if(existing) existing.qty += qty;
   else cart.push({...product, qty});
-
   saveCart();
 }
 
-function loadCart() {
-  const raw = localStorage.getItem("site_cart_v1");
-  return raw ? JSON.parse(raw) : [];
-}
-
-function saveCart() {
+function saveCart(){
   localStorage.setItem("site_cart_v1", JSON.stringify(cart));
-  updateCartCount();
   renderCart();
+  updateCartCount();
 }
 
-function updateCartCount() {
-  const count = cart.reduce((s,i) => s + (i.qty||0), 0);
-  document.getElementById("cart-count").textContent = count;
+function updateCartCount(){
+  const count = cart.reduce((s,i)=>s+(i.qty||0),0);
+  document.getElementById("cart-count").textContent=count;
 }
 
-function cartSubtotal() {
-  return cart.reduce((s,i) => s + (i.price||0)*(i.qty||0),0);
+function cartSubtotal(){
+  return cart.reduce((s,i)=>s+(i.price||0)*(i.qty||0),0);
 }
 
-function renderCart() {
+function renderCart(){
   const el = document.getElementById("cart-items");
-  if(cart.length===0){
-    el.innerHTML="<p>Your cart is empty.</p>";
-    document.getElementById("cart-subtotal").textContent="0.00";
-    return;
-  }
-
-  el.innerHTML = cart.map(item => `
+  if(cart.length===0){ el.innerHTML="<p>Your cart is empty.</p>"; document.getElementById("cart-subtotal").textContent="0.00"; return; }
+  el.innerHTML = cart.map(item=>`
     <div class="cart-item">
-      ${item.image ? `<img src="${item.image}" alt="${item.name}">` : ""}
-      <div class="meta">
+      ${item.image?`<img src="${item.image}" alt="${item.name}">`:""}
+      <div>
         <h4>${item.name}</h4>
-        <div class="price">$${item.price.toFixed(2)}</div>
+        <p>$${item.price.toFixed(2)}</p>
       </div>
       <div class="actions">
         <input type="number" min="1" value="${item.qty}" data-id="${item.id}" class="qty-input">
@@ -160,10 +117,9 @@ function renderCart() {
       </div>
     </div>
   `).join("");
+  document.getElementById("cart-subtotal").textContent=cartSubtotal().toFixed(2);
 
-  document.getElementById("cart-subtotal").textContent = cartSubtotal().toFixed(2);
-
-  document.querySelectorAll(".qty-input").forEach(input => {
+  document.querySelectorAll(".qty-input").forEach(input=>{
     input.addEventListener("change", e=>{
       const id = e.currentTarget.dataset.id;
       const qty = Math.max(1, parseInt(e.currentTarget.value)||1);
@@ -182,56 +138,40 @@ function renderCart() {
   });
 }
 
-const cartBtn = document.getElementById("cart-btn");
-const cartPanel = document.getElementById("cart-panel");
-const closeCart = document.getElementById("close-cart");
+document.getElementById("cart-btn").addEventListener("click", ()=>document.getElementById("cart-panel").classList.add("open"));
+document.getElementById("close-cart").addEventListener("click", ()=>document.getElementById("cart-panel").classList.remove("open"));
 
-cartBtn.addEventListener("click",()=>cartPanel.classList.add("open"));
-closeCart.addEventListener("click",()=>cartPanel.classList.remove("open"));
-
-document.getElementById("category-filter").addEventListener("change",e=>{
-  const cat = e.target.value;
-  const filtered = cat ? products.filter(p=>p.category===cat) : products;
-  displayProducts(filtered);
-});
-
-document.getElementById("search").addEventListener("input",e=>{
-  const term = e.target.value.toLowerCase();
-  const filtered = products.filter(p=>
-    p.name.toLowerCase().includes(term) ||
-    p.desc.toLowerCase().includes(term) ||
-    p.category.toLowerCase().includes(term)
-  );
-  displayProducts(filtered);
-});
-
-function populateCategoryFilter() {
-  const select = document.getElementById("category-filter");
-  select.innerHTML='<option value="">All</option>';
-  const categories = [...new Set(products.map(p=>p.category).filter(c=>c))];
-  categories.forEach(c=>{
-    const opt=document.createElement("option");
-    opt.value=c;
-    opt.textContent=c;
-    select.appendChild(opt);
-  });
-}
-
-function openLightbox(src){
-  document.getElementById("lightbox").classList.remove("hidden");
-  document.getElementById("lightbox-img").src=src;
-}
-document.getElementById("close").addEventListener("click",()=>{
-  document.getElementById("lightbox").classList.add("hidden");
-});
-
-document.getElementById("checkoutForm").addEventListener("submit", function(e){
+document.getElementById("checkoutForm").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  document.getElementById("status").textContent="Submitting...";
   document.getElementById("cartData").value = JSON.stringify(cart);
-  cart = []; 
-  saveCart();
+
+  const formData = {
+    customerName: e.target.customerName.value,
+    customerEmail: e.target.customerEmail.value,
+    customerPhone: e.target.customerPhone.value,
+    cartData: cart
+  };
+
+  try{
+    const res = await fetch(APP_SCRIPT_URL,{
+      method:"POST",
+      body: JSON.stringify(formData)
+    });
+    if(res.ok){
+      document.getElementById("status").textContent="Order submitted successfully!";
+      cart = [];
+      saveCart();
+    } else{
+      document.getElementById("status").textContent="Error submitting order.";
+    }
+  } catch(err){
+    document.getElementById("status").textContent="Error submitting order.";
+    console.error(err);
+  }
 });
 
-loadProducts();
+renderProducts();
 renderCart();
 updateCartCount();
 </script>
