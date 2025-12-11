@@ -7,15 +7,18 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
 <header>
-  <div class="logo-container"><h1>Allied Health Scientific</h1></div>
+  <div class="logo-container">
+    <h1>Allied Health Scientific</h1>
+  </div>
   <nav class="toolbar">
     <a href="about.html">About Us</a>
     <a href="contact.html">Contact</a>
   </nav>
   <input type="text" id="search" placeholder="Search products...">
-  <select id="category-filter"></select>
+  <select id="category-filter">
+    <option value="">All</option>
+  </select>
   <button id="cart-btn">Cart (<span id="cart-count">0</span>)</button>
 </header>
 
@@ -29,18 +32,21 @@
   <div id="cart-items"></div>
   <p>Subtotal: $<span id="cart-subtotal">0.00</span></p>
 
-  <h3>Checkout</h3>
-  <form id="checkout-form">
-    <label>Name</label>
-    <input type="text" id="customer-name" required>
-    <label>Email</label>
-    <input type="email" id="customer-email" required>
-    <label>Phone</label>
-    <input type="text" id="customer-phone" required>
-    <button type="submit">Place Order</button>
+  <form id="checkoutForm" method="POST" target="hiddenFrame">
+    <input type="hidden" name="cartData" id="cartData">
+    <label>Name</label><input type="text" name="customerName" required>
+    <label>Email</label><input type="email" name="customerEmail" required>
+    <label>Phone</label><input type="text" name="customerPhone" required>
+    <button type="submit">Checkout</button>
   </form>
-  <p id="checkout-status"></p>
+  <iframe name="hiddenFrame" style="display:none;"></iframe>
 </div>
+
+<section id="contact">
+  <h2>Contact Us</h2>
+  <p>Email: <a href="mailto:tesecumj@gmail.com">tesecumj@gmail.com</a></p>
+  <p>WhatsApp: <a href="https://wa.me/15016029197" target="_blank">+501 602-9197</a></p>
+</section>
 
 <div id="lightbox" class="hidden">
   <span id="close">&times;</span>
@@ -49,12 +55,11 @@
 
 <script>
 const sheetURL = "https://docs.google.com/spreadsheets/d/1gDRKAFFNtFlox6OyG8fr6y5PMRahFQLy_TQzXatJtwo/gviz/tq?tqx=out:json";
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby4KNN--49uttnqyLgqaJToGcBZ-9MeemMjQuegvMNzWoHqdxcacFJAsTCZVgBJgwl95w/exec";
+const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4KNN--49uttnqyLgqaJToGcBZ-9MeemMjQuegvMNzWoHqdxcacFJAsTCZVgBJgwl95w/exec";
 
 let products = [];
 let cart = loadCart();
 
-// Load products
 async function loadProducts() {
   try {
     const res = await fetch(sheetURL);
@@ -74,13 +79,12 @@ async function loadProducts() {
     populateCategoryFilter();
     displayProducts(products);
     updateCartCount();
-  } catch(err) {
+  } catch (err) {
     console.error("Error loading products:", err);
     document.getElementById("product-list").innerHTML = "<p>Failed to load products.</p>";
   }
 }
 
-// Display products
 function displayProducts(list) {
   const container = document.getElementById("product-list");
   container.innerHTML = list.map(p => `
@@ -102,7 +106,6 @@ function displayProducts(list) {
   });
 }
 
-// Add to cart from quantity input
 function addToCartFromInput(id) {
   const product = products.find(p => p.id === id);
   const qtyInput = document.getElementById(`qty-${id}`);
@@ -111,34 +114,36 @@ function addToCartFromInput(id) {
 
   const existing = cart.find(i => i.id === id);
   if (existing) existing.qty += qty;
-  else cart.push({ ...product, qty });
+  else cart.push({...product, qty});
+
   saveCart();
 }
 
-// Cart load/save
 function loadCart() {
   const raw = localStorage.getItem("site_cart_v1");
   return raw ? JSON.parse(raw) : [];
 }
+
 function saveCart() {
   localStorage.setItem("site_cart_v1", JSON.stringify(cart));
   updateCartCount();
   renderCart();
 }
+
 function updateCartCount() {
-  const count = cart.reduce((s,i)=>s+(i.qty||0),0);
+  const count = cart.reduce((s,i) => s + (i.qty||0), 0);
   document.getElementById("cart-count").textContent = count;
 }
+
 function cartSubtotal() {
-  return cart.reduce((s,i)=>s+(i.price||0)*(i.qty||0),0);
+  return cart.reduce((s,i) => s + (i.price||0)*(i.qty||0),0);
 }
 
-// Render cart panel
 function renderCart() {
   const el = document.getElementById("cart-items");
-  if(cart.length === 0) {
-    el.innerHTML = "<p>Your cart is empty.</p>";
-    document.getElementById("cart-subtotal").textContent = "0.00";
+  if(cart.length===0){
+    el.innerHTML="<p>Your cart is empty.</p>";
+    document.getElementById("cart-subtotal").textContent="0.00";
     return;
   }
 
@@ -158,7 +163,7 @@ function renderCart() {
 
   document.getElementById("cart-subtotal").textContent = cartSubtotal().toFixed(2);
 
-  document.querySelectorAll(".qty-input").forEach(input=>{
+  document.querySelectorAll(".qty-input").forEach(input => {
     input.addEventListener("change", e=>{
       const id = e.currentTarget.dataset.id;
       const qty = Math.max(1, parseInt(e.currentTarget.value)||1);
@@ -177,19 +182,20 @@ function renderCart() {
   });
 }
 
-// Cart panel open/close
-document.getElementById("cart-btn").addEventListener("click", ()=>document.getElementById("cart-panel").classList.add("open"));
-document.getElementById("close-cart").addEventListener("click", ()=>document.getElementById("cart-panel").classList.remove("open"));
+const cartBtn = document.getElementById("cart-btn");
+const cartPanel = document.getElementById("cart-panel");
+const closeCart = document.getElementById("close-cart");
 
-// Category filter
-document.getElementById("category-filter").addEventListener("change", e=>{
+cartBtn.addEventListener("click",()=>cartPanel.classList.add("open"));
+closeCart.addEventListener("click",()=>cartPanel.classList.remove("open"));
+
+document.getElementById("category-filter").addEventListener("change",e=>{
   const cat = e.target.value;
   const filtered = cat ? products.filter(p=>p.category===cat) : products;
   displayProducts(filtered);
 });
 
-// Search
-document.getElementById("search").addEventListener("input", e=>{
+document.getElementById("search").addEventListener("input",e=>{
   const term = e.target.value.toLowerCase();
   const filtered = products.filter(p=>
     p.name.toLowerCase().includes(term) ||
@@ -199,67 +205,35 @@ document.getElementById("search").addEventListener("input", e=>{
   displayProducts(filtered);
 });
 
-// Populate categories
 function populateCategoryFilter() {
   const select = document.getElementById("category-filter");
-  select.innerHTML = '<option value="">All</option>';
+  select.innerHTML='<option value="">All</option>';
   const categories = [...new Set(products.map(p=>p.category).filter(c=>c))];
   categories.forEach(c=>{
-    const opt = document.createElement("option");
-    opt.value = c;
-    opt.textContent = c;
+    const opt=document.createElement("option");
+    opt.value=c;
+    opt.textContent=c;
     select.appendChild(opt);
   });
 }
 
-// Lightbox
-function openLightbox(src) {
+function openLightbox(src){
   document.getElementById("lightbox").classList.remove("hidden");
-  document.getElementById("lightbox-img").src = src;
+  document.getElementById("lightbox-img").src=src;
 }
-document.getElementById("close").addEventListener("click", ()=>document.getElementById("lightbox").classList.add("hidden"));
-
-// Checkout form submission
-document.getElementById("checkout-form").addEventListener("submit", async e=>{
-  e.preventDefault();
-  if(cart.length===0){
-    alert("Cart is empty.");
-    return;
-  }
-
-  const statusEl = document.getElementById("checkout-status");
-  statusEl.textContent = "Placing order...";
-
-  const payload = {
-    customerName: document.getElementById("customer-name").value,
-    customerEmail: document.getElementById("customer-email").value,
-    customerPhone: document.getElementById("customer-phone").value,
-    cartItems: cart.map(i=>({name:i.name, qty:i.qty, price:i.price}))
-  };
-
-  try {
-    const res = await fetch(WEB_APP_URL,{
-      method:"POST",
-      body: JSON.stringify(payload),
-      headers: {"Content-Type":"application/json"}
-    });
-
-    if(!res.ok) throw new Error("Network response not ok");
-
-    statusEl.textContent = "Order placed successfully!";
-    cart=[]; saveCart();
-    document.getElementById("checkout-form").reset();
-  } catch(err){
-    console.error("Checkout error", err);
-    statusEl.textContent = "Failed to place order.";
-  }
+document.getElementById("close").addEventListener("click",()=>{
+  document.getElementById("lightbox").classList.add("hidden");
 });
 
-// Initialize
+document.getElementById("checkoutForm").addEventListener("submit", function(e){
+  document.getElementById("cartData").value = JSON.stringify(cart);
+  cart = []; 
+  saveCart();
+});
+
 loadProducts();
 renderCart();
 updateCartCount();
 </script>
-
 </body>
 </html>
