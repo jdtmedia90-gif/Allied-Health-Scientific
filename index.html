@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Allied Health Scientific</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
@@ -17,10 +17,17 @@
       <a href="contact.html">Contact</a>
     </nav>
 
-    <input type="text" id="search" placeholder="Search products...">
-    <select id="category-filter">
-      <option value="">All Categories</option>
-    </select>
+    <div class="header-controls">
+      <input type="text" id="search" placeholder="Search products...">
+      <select id="category-filter">
+        <option value="">All Categories</option>
+      </select>
+
+      <!-- Cart icon -->
+      <button id="cart-btn" title="Open cart">
+        🛒 <span id="cart-count">0</span>
+      </button>
+    </div>
   </header>
 
   <main>
@@ -32,6 +39,28 @@
     <p>Email: <a href="mailto:tesecumj@gmail.com">tesecumj@gmail.com</a></p>
     <p>WhatsApp: <a href="https://wa.me/15016029197" target="_blank">+501 602-9197</a></p>
   </section>
+
+  <!-- Slide-out cart panel -->
+  <aside id="cart-panel" class="closed" aria-hidden="true">
+    <header class="cart-header">
+      <h2>Your Cart</h2>
+      <button id="close-cart" title="Close cart">✕</button>
+    </header>
+
+    <div id="cart-items"></div>
+
+    <div class="cart-footer">
+      <div class="cart-totals">
+        <div>Subtotal: <span id="cart-subtotal"> $0.00</span></div>
+      </div>
+
+      <div class="checkout-form">
+        <input id="customer-name" placeholder="Your name" />
+        <input id="customer-phone" placeholder="Phone or email" />
+        <button id="checkout-btn">Checkout & Send Order</button>
+      </div>
+    </div>
+  </aside>
 
   <div id="lightbox" class="hidden">
     <span id="close">&times;</span>
