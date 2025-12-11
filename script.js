@@ -1,9 +1,11 @@
+// ============ CONFIG ============
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby4KNN--49uttnqyLgqaJToGcBZ-9MeemMjQuegvMNzWoHqdxcacFJAsTCZVgBJgwl95w/exec"; 
 const sheetURL = "https://docs.google.com/spreadsheets/d/1gDRKAFFNtFlox6OyG8fr6y5PMRahFQLy_TQzXatJtwo/gviz/tq?tqx=out:json";
 
 let products = [];
 let cart = loadCart();
 
-// Load products from Google Sheet
+// ---------- Load products ----------
 async function loadProducts() {
   try {
     const res = await fetch(sheetURL);
@@ -29,7 +31,7 @@ async function loadProducts() {
   }
 }
 
-// Display products with quantity input and add-to-cart
+// ---------- Display products ----------
 function displayProducts(list) {
   const container = document.getElementById("product-list");
   container.innerHTML = list.map(p => `
@@ -51,7 +53,7 @@ function displayProducts(list) {
   });
 }
 
-// Add to cart from quantity input
+// ---------- Cart logic ----------
 function addToCartFromInput(id) {
   const product = products.find(p => p.id === id);
   const qtyInput = document.getElementById(`qty-${id}`);
@@ -67,11 +69,11 @@ function addToCartFromInput(id) {
   saveCart();
 }
 
-// Load/save cart
 function loadCart() {
   const raw = localStorage.getItem("site_cart_v1");
   return raw ? JSON.parse(raw) : [];
 }
+
 function saveCart() {
   localStorage.setItem("site_cart_v1", JSON.stringify(cart));
   updateCartCount();
@@ -87,7 +89,7 @@ function cartSubtotal() {
   return cart.reduce((s, i) => s + (i.price || 0) * (i.qty || 0), 0);
 }
 
-// Render cart panel
+// ---------- Render cart ----------
 function renderCart() {
   const el = document.getElementById("cart-items");
   if (cart.length === 0) {
@@ -131,7 +133,7 @@ function renderCart() {
   });
 }
 
-// Cart panel open/close
+// ---------- Cart panel ----------
 const cartBtn = document.getElementById("cart-btn");
 const cartPanel = document.getElementById("cart-panel");
 const closeCart = document.getElementById("close-cart");
@@ -139,14 +141,14 @@ const closeCart = document.getElementById("close-cart");
 cartBtn.addEventListener("click", () => cartPanel.classList.add("open"));
 closeCart.addEventListener("click", () => cartPanel.classList.remove("open"));
 
-// Category filter
+// ---------- Category filter ----------
 document.getElementById("category-filter").addEventListener("change", e => {
   const cat = e.target.value;
   const filtered = cat ? products.filter(p => p.category === cat) : products;
   displayProducts(filtered);
 });
 
-// Search
+// ---------- Search ----------
 document.getElementById("search").addEventListener("input", e => {
   const term = e.target.value.toLowerCase();
   const filtered = products.filter(p =>
@@ -157,7 +159,7 @@ document.getElementById("search").addEventListener("input", e => {
   displayProducts(filtered);
 });
 
-// Populate category filter with All
+// ---------- Populate category filter ----------
 function populateCategoryFilter() {
   const select = document.getElementById("category-filter");
   select.innerHTML = '<option value="">All</option>';
@@ -170,7 +172,7 @@ function populateCategoryFilter() {
   });
 }
 
-// Lightbox
+// ---------- Lightbox ----------
 function openLightbox(src) {
   document.getElementById("lightbox").classList.remove("hidden");
   document.getElementById("lightbox-img").src = src;
@@ -179,7 +181,51 @@ document.getElementById("close").addEventListener("click", () => {
   document.getElementById("lightbox").classList.add("hidden");
 });
 
-// Initialize
+// ---------- Checkout ----------
+document.getElementById("checkout-btn").addEventListener("click", async () => {
+  if (cart.length === 0) {
+    alert("Cart is empty.");
+    return;
+  }
+
+  const name = prompt("Enter your name:");
+  const email = prompt("Enter your email:");
+  const phone = prompt("Enter your phone:");
+
+  if (!name || !email) {
+    alert("Name and email are required.");
+    return;
+  }
+
+  const payload = {
+    customerName: name,
+    customerEmail: email,
+    customerPhone: phone,
+    timestamp: new Date().toISOString(),
+    items: cart.map(i => ({ name: i.name, qty: i.qty, price: i.price })),
+    subtotal: cartSubtotal()
+  };
+
+  try {
+    const resp = await fetch(WEB_APP_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data?.error || "Server error");
+
+    alert("Order placed! You will receive an email confirmation.");
+    cart = [];
+    saveCart();
+    cartPanel.classList.remove("open");
+  } catch (err) {
+    console.error("Checkout error:", err);
+    alert("Failed to place order. See console for details.");
+  }
+});
+
+// ---------- Initialize ----------
 loadProducts();
 renderCart();
 updateCartCount();
