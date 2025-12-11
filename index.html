@@ -5,44 +5,206 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Allied Health Scientific</title>
 <link rel="stylesheet" href="style.css">
+<style>
+  body {font-family: Arial, sans-serif; margin: 0; padding: 0;}
+  header {padding: 1rem; background: #0073e6; color: #fff; display: flex; align-items: center; gap: 1rem;}
+  header input, header select {padding: 0.5rem; margin-left: auto;}
+  .product {border: 1px solid #ddd; padding: 1rem; margin: 1rem; border-radius: 6px; display: inline-block; vertical-align: top; width: 200px; text-align: center;}
+  .product img {width: 100%; height: 150px; object-fit: contain; cursor: pointer;}
+  .qty-box {margin: 0.5rem 0;}
+  #cart-panel {position: fixed; top: 0; right: -400px; width: 400px; height: 100%; background: #f9f9f9; box-shadow: -2px 0 5px rgba(0,0,0,0.3); transition: right 0.3s; padding: 1rem; overflow-y: auto;}
+  #cart-panel.open {right: 0;}
+  .cart-item {display: flex; gap: 0.5rem; margin-bottom: 1rem;}
+  .cart-item img {width: 60px; height: 60px; object-fit: contain;}
+  .actions {display: flex; flex-direction: column; gap: 0.3rem;}
+  .hidden {display: none;}
+  #lightbox {position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); display: flex; justify-content:center; align-items:center; z-index:1000;}
+  #lightbox img {max-width:80%; max-height:80%;}
+  #close {position:absolute; top:10px; right:20px; font-size:2rem; color:#fff; cursor:pointer;}
+</style>
 </head>
 <body>
 <header>
-  <div class="logo-container">
-    <h1>Allied Health Scientific</h1>
-  </div>
-  <nav class="toolbar">
-    <a href="about.html">About Us</a>
-    <a href="contact.html">Contact</a>
-  </nav>
+  <h1>Allied Health Scientific</h1>
   <input type="text" id="search" placeholder="Search products...">
   <select id="category-filter"><option value="">All</option></select>
+  <button id="cart-btn">Cart (<span id="cart-count">0</span>)</button>
 </header>
 <main>
   <div id="product-list"></div>
 </main>
-
-<!-- Cart panel -->
-<div id="cart-panel" class="closed">
-  <h2>Cart (<span id="cart-count">0</span>)</h2>
-  <div id="cart-items"></div>
-  <div>
-    Subtotal: $<span id="cart-subtotal">0.00</span>
-  </div>
-  <div>
-    <input type="text" id="customer-name" placeholder="Your Name">
-    <input type="text" id="customer-phone" placeholder="Phone/Email">
-  </div>
-  <button id="checkout-btn">Checkout</button>
+<div id="cart-panel">
   <button id="close-cart">Close</button>
+  <h2>Your Cart</h2>
+  <div id="cart-items"></div>
+  <p>Subtotal: $<span id="cart-subtotal">0.00</span></p>
+  <h3>Checkout</h3>
+  <input type="text" id="customer-name" placeholder="Your Name"><br>
+  <input type="email" id="customer-email" placeholder="Your Email"><br>
+  <input type="text" id="customer-phone" placeholder="Your Phone"><br>
+  <button id="checkout-btn">Place Order</button>
 </div>
-<button id="cart-btn">Open Cart</button>
+<div id="lightbox" class="hidden"><span id="close">&times;</span><img id="lightbox-img" src="" alt="Product Image"></div>
+<script>
+const sheetURL = "https://docs.google.com/spreadsheets/d/1gDRKAFFNtFlox6OyG8fr6y5PMRahFQLy_TQzXatJtwo/gviz/tq?tqx=out:json";
+const WEB_APP_URL = 'YOUR_APPS_SCRIPT_URL_HERE'; // replace with your deployed script
 
-<div id="lightbox" class="hidden">
-  <span id="close">&times;</span>
-  <img id="lightbox-img" src="" alt="Product Image">
-</div>
+let products = [];
+let cart = [];
 
-<script src="script.js"></script>
+// Load cart from localStorage
+function loadCart() {
+  const raw = localStorage.getItem('site_cart_v1');
+  return raw ? JSON.parse(raw) : [];
+}
+function saveCart() {
+  localStorage.setItem('site_cart_v1', JSON.stringify(cart));
+  updateCartCount();
+  renderCart();
+}
+
+function updateCartCount() {
+  const count = cart.reduce((s,i)=>s+(i.qty||0),0);
+  document.getElementById('cart-count').textContent = count;
+}
+
+function cartSubtotal() {
+  return cart.reduce((s,i)=>s+(i.price||0)*(i.qty||0),0);
+}
+
+// Load products from Google Sheet
+async function loadProducts() {
+  try {
+    const res = await fetch(sheetURL);
+    const text = await res.text();
+    const jsonData = JSON.parse(text.substring(47).slice(0,-2));
+    const rows = jsonData.table.rows;
+    products = rows.slice(1).map((r,i)=>({
+      id: r.c[0]?.v?.toString()||'p'+i,
+      name: r.c[0]?.v||'Unnamed',
+      category: r.c[1]?.v||'',
+      price: parseFloat(r.c[2]?.v)||0,
+      desc: r.c[3]?.v||'',
+      image: r.c[4]?.v||''
+    }));
+    populateCategoryFilter();
+    displayProducts(products);
+    cart = loadCart();
+    updateCartCount();
+    renderCart();
+  } catch(e) {
+    console.error('Error loading products', e);
+    document.getElementById('product-list').innerHTML = '<p>Failed to load products.</p>';
+  }
+}
+
+function displayProducts(list) {
+  const container = document.getElementById('product-list');
+  container.innerHTML = list.map(p=>`<div class="product" data-category="${p.category}">
+    ${p.image?`<img src="${p.image}" alt="${p.name}">`:''}
+    <h3>${p.name}</h3>
+    <p class="desc">${p.desc}</p>
+    <p class="price">$${p.price.toFixed(2)}</p>
+    <div class="qty-box"><label>Qty:</label><input type="number" min="1" value="1" id="qty-${p.id}"></div>
+    <button onclick="addToCartFromInput('${p.id}')">Add to Cart</button>
+  </div>`).join('');
+
+  document.querySelectorAll('.product img').forEach(img=>{
+    img.addEventListener('click',()=>openLightbox(img.src));
+  });
+}
+
+function addToCartFromInput(id){
+  const product = products.find(p=>p.id===id);
+  const qty = parseInt(document.getElementById(`qty-${id}`).value)||1;
+  const existing = cart.find(i=>i.id===id);
+  if(existing){existing.qty+=qty;} else {cart.push({...product,qty});}
+  saveCart();
+}
+
+function renderCart(){
+  const el = document.getElementById('cart-items');
+  if(cart.length===0){el.innerHTML='<p>Your cart is empty.</p>'; document.getElementById('cart-subtotal').textContent='0.00'; return;}
+  el.innerHTML = cart.map(item=>`<div class="cart-item">
+    ${item.image?`<img src="${item.image}" alt="${item.name}">`:''}
+    <div class="meta"><h4>${item.name}</h4><div class="price">$${item.price.toFixed(2)}</div></div>
+    <div class="actions"><input type="number" min="1" value="${item.qty}" data-id="${item.id}" class="qty-input"><button class="remove-item" data-id="${item.id}">Remove</button></div>
+  </div>`).join('');
+
+  document.getElementById('cart-subtotal').textContent = cartSubtotal().toFixed(2);
+
+  document.querySelectorAll('.qty-input').forEach(input=>{
+    input.addEventListener('change',e=>{
+      const id = e.currentTarget.dataset.id;
+      const qty = Math.max(1,parseInt(e.currentTarget.value)||1);
+      const item = cart.find(i=>i.id===id);
+      if(item) item.qty = qty;
+      saveCart();
+    });
+  });
+  document.querySelectorAll('.remove-item').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      const id=e.currentTarget.dataset.id;
+      cart = cart.filter(i=>i.id!==id);
+      saveCart();
+    });
+  });
+}
+
+function populateCategoryFilter(){
+  const select = document.getElementById('category-filter');
+  select.innerHTML='<option value="">All</option>';
+  const cats=[...new Set(products.map(p=>p.category).filter(c=>c))];
+  cats.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;select.appendChild(o);});
+}
+
+function openLightbox(src){
+  document.getElementById('lightbox').classList.remove('hidden');
+  document.getElementById('lightbox-img').src=src;
+}
+document.getElementById('close').addEventListener('click',()=>document.getElementById('lightbox').classList.add('hidden'));
+
+document.getElementById('cart-btn').addEventListener('click',()=>document.getElementById('cart-panel').classList.add('open'));
+document.getElementById('close-cart').addEventListener('click',()=>document.getElementById('cart-panel').classList.remove('open'));
+
+document.getElementById('category-filter').addEventListener('change',e=>{
+  const cat=e.target.value;
+  const filtered=cat?products.filter(p=>p.category===cat):products;
+  displayProducts(filtered);
+});
+document.getElementById('search').addEventListener('input',e=>{
+  const term=e.target.value.toLowerCase();
+  const filtered=products.filter(p=>p.name.toLowerCase().includes(term)||p.desc.toLowerCase().includes(term)||p.category.toLowerCase().includes(term));
+  displayProducts(filtered);
+});
+
+// Checkout inside cart panel
+document.getElementById('checkout-btn').addEventListener('click',async()=>{
+  if(cart.length===0){alert('Cart is empty'); return;}
+  const name=document.getElementById('customer-name').value.trim();
+  const email=document.getElementById('customer-email').value.trim();
+  const phone=document.getElementById('customer-phone').value.trim();
+  if(!name||!email){alert('Name and email required');return;}
+  const payload={customerName:name,customerEmail:email,customerPhone:phone,items:cart,subtotal:cartSubtotal()};
+
+  try{
+    const resp=await fetch(WEB_APP_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const data=await resp.json();
+    if(!resp.ok)throw new Error(data?.message||'Server error');
+    alert('Order placed! You will receive an email confirmation.');
+    cart=[];
+    saveCart();
+    document.getElementById('customer-name').value='';
+    document.getElementById('customer-email').value='';
+    document.getElementById('customer-phone').value='';
+    document.getElementById('cart-panel').classList.remove('open');
+  }catch(err){
+    console.error('Checkout error',err);
+    alert('Failed to place order. Check console.');
+  }
+});
+
+loadProducts();
+</script>
 </body>
 </html>
