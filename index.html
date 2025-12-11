@@ -1,70 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Allied Health Scientific</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <div class="logo-container">
-      <h1>Allied Health Scientific</h1>
-    </div>
 
-    <nav class="toolbar">
+  <header class="header">
+    <div class="logo">Allied Health Scientific</div>
+
+    <nav class="nav">
       <a href="about.html">About Us</a>
       <a href="contact.html">Contact</a>
     </nav>
 
     <div class="header-controls">
       <input type="text" id="search" placeholder="Search products...">
-      <select id="category-filter">
-        <option value="">All Categories</option>
-      </select>
+      <select id="category-filter"></select>
 
-      <!-- Cart icon -->
-      <button id="cart-btn" title="Open cart">
+      <div class="cart-icon">
         🛒 <span id="cart-count">0</span>
-      </button>
+      </div>
     </div>
   </header>
 
   <main>
-    <div id="product-list"></div>
+    <h2 class="section-title">Products</h2>
+    <div id="product-list" class="product-grid"></div>
   </main>
 
-  <section id="contact">
-    <h2>Contact Us</h2>
+  <footer class="footer">
     <p>Email: <a href="mailto:tesecumj@gmail.com">tesecumj@gmail.com</a></p>
     <p>WhatsApp: <a href="https://wa.me/15016029197" target="_blank">+501 602-9197</a></p>
-  </section>
+  </footer>
 
-  <!-- Slide-out cart panel -->
-  <aside id="cart-panel" class="closed" aria-hidden="true">
-    <header class="cart-header">
-      <h2>Your Cart</h2>
-      <button id="close-cart" title="Close cart">✕</button>
-    </header>
-
-    <div id="cart-items"></div>
-
-    <div class="cart-footer">
-      <div class="cart-totals">
-        <div>Subtotal: <span id="cart-subtotal"> $0.00</span></div>
-      </div>
-
-      <div class="checkout-form">
-        <input id="customer-name" placeholder="Your name" />
-        <input id="customer-phone" placeholder="Phone or email" />
-        <button id="checkout-btn">Checkout & Send Order</button>
-      </div>
-    </div>
-  </aside>
-
-  <div id="lightbox" class="hidden">
+  <div id="lightbox" class="lightbox hidden">
     <span id="close">&times;</span>
-    <img id="lightbox-img" src="" alt="Product Image">
+    <img id="lightbox-img">
   </div>
 
   <script src="script.js"></script>
