@@ -32,7 +32,7 @@
   <div id="cart-items"></div>
   <p>Subtotal: $<span id="cart-subtotal">0.00</span></p>
 
-  <form id="checkoutForm" method="POST" target="hiddenFrame" action="https://script.google.com/macros/s/AKfycby4KNN--49uttnqyLgqaJToGcBZ-9MeemMjQuegvMNzWoHqdxcacFJAsTCZVgBJgwl95w/exec">
+  <form id="checkoutForm" method="POST" action="https://script.google.com/macros/s/AKfycby4KNN--49uttnqyLgqaJToGcBZ-9MeemMjQuegvMNzWoHqdxcacFJAsTCZVgBJgwl95w/exec" target="hiddenFrame">
     <input type="hidden" name="cartData" id="cartData">
     <label>Name</label><input type="text" name="customerName" required>
     <label>Email</label><input type="email" name="customerEmail" required>
@@ -40,8 +40,13 @@
     <button type="submit">Checkout</button>
   </form>
   <iframe name="hiddenFrame" style="display:none;"></iframe>
-  <p id="status"></p>
 </div>
+
+<section id="contact">
+  <h2>Contact Us</h2>
+  <p>Email: <a href="mailto:tesecumj@gmail.com">tesecumj@gmail.com</a></p>
+  <p>WhatsApp: <a href="https://wa.me/15016029197" target="_blank">+501 602-9197</a></p>
+</section>
 
 <div id="lightbox" class="hidden">
   <span id="close">&times;</span>
@@ -54,6 +59,7 @@ const sheetURL = "https://docs.google.com/spreadsheets/d/1gDRKAFFNtFlox6OyG8fr6y
 let products = [];
 let cart = loadCart();
 
+// Load products from Google Sheet
 async function loadProducts() {
   try {
     const res = await fetch(sheetURL);
@@ -61,8 +67,8 @@ async function loadProducts() {
     const jsonData = JSON.parse(text.substring(47).slice(0, -2));
     const rows = jsonData.table.rows;
 
-    products = rows.slice(1).map((r, i) => ({
-      id: r.c[0]?.v?.toString() || "p" + i,
+    products = rows.slice(1).map((r,i)=>({
+      id: r.c[0]?.v?.toString() || "p"+i,
       name: r.c[0]?.v || "Unnamed",
       category: r.c[1]?.v || "",
       price: parseFloat(r.c[2]?.v) || 0,
@@ -73,15 +79,16 @@ async function loadProducts() {
     populateCategoryFilter();
     displayProducts(products);
     updateCartCount();
-  } catch (err) {
+  } catch(err){
     console.error("Error loading products:", err);
-    document.getElementById("product-list").innerHTML = "<p>Failed to load products.</p>";
+    document.getElementById("product-list").innerHTML="<p>Failed to load products.</p>";
   }
 }
 
-function displayProducts(list) {
+// Display products
+function displayProducts(list){
   const container = document.getElementById("product-list");
-  container.innerHTML = list.map(p => `
+  container.innerHTML = list.map(p=>`
     <div class="product" data-category="${p.category}">
       ${p.image ? `<img src="${p.image}" alt="${p.name}">` : ""}
       <h3>${p.name}</h3>
@@ -95,45 +102,48 @@ function displayProducts(list) {
     </div>
   `).join("");
 
-  document.querySelectorAll(".product img").forEach(img => {
-    img.addEventListener("click", () => openLightbox(img.src));
+  document.querySelectorAll(".product img").forEach(img=>{
+    img.addEventListener("click",()=>openLightbox(img.src));
   });
 }
 
-function addToCartFromInput(id) {
-  const product = products.find(p => p.id === id);
+// Add product from quantity input
+function addToCartFromInput(id){
+  const product = products.find(p=>p.id===id);
   const qtyInput = document.getElementById(`qty-${id}`);
   let qty = parseInt(qtyInput.value);
-  if (!qty || qty < 1) qty = 1;
+  if(!qty || qty<1) qty=1;
 
-  const existing = cart.find(i => i.id === id);
-  if (existing) existing.qty += qty;
+  const existing = cart.find(i=>i.id===id);
+  if(existing) existing.qty+=qty;
   else cart.push({...product, qty});
 
   saveCart();
 }
 
-function loadCart() {
+// Cart functions
+function loadCart(){
   const raw = localStorage.getItem("site_cart_v1");
   return raw ? JSON.parse(raw) : [];
 }
 
-function saveCart() {
+function saveCart(){
   localStorage.setItem("site_cart_v1", JSON.stringify(cart));
   updateCartCount();
   renderCart();
 }
 
-function updateCartCount() {
-  const count = cart.reduce((s,i) => s + (i.qty||0), 0);
+function updateCartCount(){
+  const count = cart.reduce((s,i)=>s+(i.qty||0),0);
   document.getElementById("cart-count").textContent = count;
 }
 
-function cartSubtotal() {
-  return cart.reduce((s,i) => s + (i.price||0)*(i.qty||0),0);
+function cartSubtotal(){
+  return cart.reduce((s,i)=>s+(i.price||0)*(i.qty||0),0);
 }
 
-function renderCart() {
+// Render cart panel
+function renderCart(){
   const el = document.getElementById("cart-items");
   if(cart.length===0){
     el.innerHTML="<p>Your cart is empty.</p>";
@@ -141,7 +151,7 @@ function renderCart() {
     return;
   }
 
-  el.innerHTML = cart.map(item => `
+  el.innerHTML = cart.map(item=>`
     <div class="cart-item">
       ${item.image ? `<img src="${item.image}" alt="${item.name}">` : ""}
       <div class="meta">
@@ -155,9 +165,9 @@ function renderCart() {
     </div>
   `).join("");
 
-  document.getElementById("cart-subtotal").textContent = cartSubtotal().toFixed(2);
+  document.getElementById("cart-subtotal").textContent=cartSubtotal().toFixed(2);
 
-  document.querySelectorAll(".qty-input").forEach(input => {
+  document.querySelectorAll(".qty-input").forEach(input=>{
     input.addEventListener("change", e=>{
       const id = e.currentTarget.dataset.id;
       const qty = Math.max(1, parseInt(e.currentTarget.value)||1);
@@ -176,16 +186,20 @@ function renderCart() {
   });
 }
 
-document.getElementById("cart-btn").addEventListener("click",()=>cartPanel.classList.add("open"));
-document.getElementById("close-cart").addEventListener("click",()=>cartPanel.classList.remove("open"));
+// Cart panel toggle
+const cartPanel = document.getElementById("cart-panel");
+document.getElementById("cart-btn").addEventListener("click", ()=>cartPanel.classList.add("open"));
+document.getElementById("close-cart").addEventListener("click", ()=>cartPanel.classList.remove("open"));
 
-document.getElementById("category-filter").addEventListener("change",e=>{
+// Category filter
+document.getElementById("category-filter").addEventListener("change", e=>{
   const cat = e.target.value;
   const filtered = cat ? products.filter(p=>p.category===cat) : products;
   displayProducts(filtered);
 });
 
-document.getElementById("search").addEventListener("input",e=>{
+// Search
+document.getElementById("search").addEventListener("input", e=>{
   const term = e.target.value.toLowerCase();
   const filtered = products.filter(p=>
     p.name.toLowerCase().includes(term) ||
@@ -195,10 +209,11 @@ document.getElementById("search").addEventListener("input",e=>{
   displayProducts(filtered);
 });
 
-function populateCategoryFilter() {
+// Category filter population
+function populateCategoryFilter(){
   const select = document.getElementById("category-filter");
   select.innerHTML='<option value="">All</option>';
-  const categories = [...new Set(products.map(p=>p.category).filter(c=>c))];
+  const categories=[...new Set(products.map(p=>p.category).filter(c=>c))];
   categories.forEach(c=>{
     const opt=document.createElement("option");
     opt.value=c;
@@ -207,19 +222,24 @@ function populateCategoryFilter() {
   });
 }
 
+// Lightbox
 function openLightbox(src){
   document.getElementById("lightbox").classList.remove("hidden");
   document.getElementById("lightbox-img").src=src;
 }
-document.getElementById("close").addEventListener("click",()=>document.getElementById("lightbox").classList.add("hidden"));
+document.getElementById("close").addEventListener("click", ()=>document.getElementById("lightbox").classList.add("hidden"));
 
-// Submit cart form like job application
+// Checkout form submission (like job app)
 document.getElementById("checkoutForm").addEventListener("submit", function(e){
-  document.getElementById("cartData").value = JSON.stringify(cart);
-  cart = [];
+  document.getElementById("cartData").value = JSON.stringify(cart.map(i=>({
+    name: i.name,
+    qty: i.qty,
+    price: i.price
+  })));
+  cart=[]; 
   saveCart();
-  document.getElementById("status").textContent = "Submitting order...";
 });
+
 loadProducts();
 renderCart();
 updateCartCount();
