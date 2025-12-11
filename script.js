@@ -1,5 +1,4 @@
-const sheetURL = "https://script.google.com/macros/s/AKfycby4KNN--49uttnqyLgqaJToGcBZ-9MeemMjQuegvMNzWoHqdxcacFJAsTCZVgBJgwl95w/exec
-";
+const sheetURL = "https://docs.google.com/spreadsheets/d/1gDRKAFFNtFlox6OyG8fr6y5PMRahFQLy_TQzXatJtwo/gviz/tq?tqx=out:json";
 
 let products = [];
 let cart = loadCart();
@@ -184,4 +183,3 @@ document.getElementById("close").addEventListener("click", () => {
 loadProducts();
 renderCart();
 updateCartCount();
-
