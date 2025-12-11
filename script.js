@@ -1,11 +1,7 @@
-// ============ CONFIG ============
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby4KNN--49uttnqyLgqaJToGcBZ-9MeemMjQuegvMNzWoHqdxcacFJAsTCZVgBJgwl95w/exec";
 const sheetURL = "https://docs.google.com/spreadsheets/d/1gDRKAFFNtFlox6OyG8fr6y5PMRahFQLy_TQzXatJtwo/gviz/tq?tqx=out:json";
-
 let products = [];
-let cart = loadCart();
 
-// ---------- LOAD PRODUCTS ----------
+// Load products from Google Sheet
 async function loadProducts() {
   try {
     const res = await fetch(sheetURL);
@@ -14,83 +10,62 @@ async function loadProducts() {
     const rows = jsonData.table.rows;
 
     products = rows.slice(1).map(r => ({
-      id: r.c[0]?.v?.toString?.() ?? cryptoRandomId(),
-      name: r.c[1]?.v || "Unnamed",
-      category: r.c[2]?.v || "",
-      price: parseFloat(r.c[3]?.v) || 0,
-      desc: r.c[4]?.v || "",
-      image: r.c[5]?.v || ""
+      name: r.c[0]?.v || "",
+      category: r.c[1]?.v || "",
+      price: parseFloat(r.c[2]?.v) || 0,
+      desc: r.c[3]?.v || "",
+      image: r.c[4]?.v || ""
     }));
 
     populateCategoryFilter();
     displayProducts(products);
-    updateCartCount();
   } catch (err) {
     console.error("Error loading products:", err);
     document.getElementById("product-list").innerHTML = "<p>Failed to load products.</p>";
   }
 }
 
-function cryptoRandomId() {
-  return Math.random().toString(36).slice(2,9);
-}
-
-// ---------- DISPLAY PRODUCTS ----------
+// Display products on page
 function displayProducts(list) {
   const container = document.getElementById("product-list");
   container.innerHTML = list.map(p => `
-    <div class="product" data-id="${escapeHtml(p.id)}">
-      ${p.image ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}">` : ''}
-      <h3>${escapeHtml(p.name)}</h3>
-      <p class="desc">${escapeHtml(p.desc)}</p>
+    <div class="product" data-category="${p.category}">
+      ${p.image ? `<img src="${p.image}" alt="${p.name}">` : ''}
+      <h3>${p.name}</h3>
+      <p class="desc">${p.desc}</p>
       ${p.price ? `<p class="price">$${p.price.toFixed(2)}</p>` : ""}
-      <div class="qty-box">
-        <label>Qty:</label>
-        <input type="number" min="1" value="1" class="qty-input" data-id="${escapeHtml(p.id)}">
-      </div>
-      <button class="add-cart-btn" data-id="${escapeHtml(p.id)}">Add to cart</button>
     </div>
   `).join("");
 
+  // Lightbox for images
   document.querySelectorAll(".product img").forEach(img => {
     img.addEventListener("click", () => openLightbox(img.src));
   });
-
-  document.querySelectorAll(".add-cart-btn").forEach(btn => {
-    btn.addEventListener("click", e => {
-      const id = e.currentTarget.dataset.id;
-      const prod = products.find(p => p.id === id);
-      const qty = parseInt(document.querySelector(`.qty-input[data-id='${id}']`).value) || 1;
-      if (prod) addToCart(prod, qty);
-    });
-  });
 }
 
-function escapeHtml(s) {
-  if (!s && s !== 0) return "";
-  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
-
-// ---------- SEARCH & FILTER ----------
+// Search filter
 document.getElementById("search").addEventListener("input", e => {
   const term = e.target.value.toLowerCase();
   const filtered = products.filter(p =>
-    (p.name||"").toLowerCase().includes(term) ||
-    (p.desc||"").toLowerCase().includes(term) ||
-    (p.category||"").toLowerCase().includes(term)
+    p.name.toLowerCase().includes(term) ||
+    p.desc.toLowerCase().includes(term) ||
+    p.category.toLowerCase().includes(term)
   );
   displayProducts(filtered);
 });
 
+// Category filter
 document.getElementById("category-filter").addEventListener("change", e => {
   const cat = e.target.value;
   const filtered = cat ? products.filter(p => p.category === cat) : products;
   displayProducts(filtered);
 });
 
+// Populate category dropdown
 function populateCategoryFilter() {
   const categories = [...new Set(products.map(p => p.category).filter(c => c))];
   const select = document.getElementById("category-filter");
+  // Clear existing options except the first
   select.querySelectorAll("option:not(:first-child)").forEach(o => o.remove());
   categories.forEach(c => {
     const opt = document.createElement("option");
@@ -100,7 +75,7 @@ function populateCategoryFilter() {
   });
 }
 
-// ---------- LIGHTBOX ----------
+// Lightbox functions
 function openLightbox(src) {
   const lb = document.getElementById("lightbox");
   lb.classList.remove("hidden");
@@ -110,138 +85,5 @@ document.getElementById("close").addEventListener("click", () => {
   document.getElementById("lightbox").classList.add("hidden");
 });
 
-// ---------- CART LOGIC ----------
-function loadCart() {
-  try {
-    const raw = localStorage.getItem("site_cart_v1");
-    return raw ? JSON.parse(raw) : [];
-  } catch(e) { return []; }
-}
-function saveCart() {
-  localStorage.setItem("site_cart_v1", JSON.stringify(cart));
-  updateCartCount();
-  renderCart();
-}
-function addToCart(product, qty=1) {
-  const existing = cart.find(i => i.id === product.id);
-  if (existing) {
-    existing.qty = Math.min(999, existing.qty + qty);
-  } else {
-    cart.push({ id: product.id, name: product.name, price: Number(product.price), image: product.image, qty });
-  }
-  saveCart();
-}
-function updateCartCount() {
-  const count = cart.reduce((s,i) => s + (i.qty||0), 0);
-  document.getElementById("cart-count").textContent = count;
-}
-function cartSubtotal() {
-  return cart.reduce((s,i) => s + (Number(i.price)||0)*(i.qty||0), 0);
-}
-
-// ---------- RENDER CART ----------
-function renderCart() {
-  const el = document.getElementById("cart-items");
-  if(cart.length===0){
-    el.innerHTML="<p>Your cart is empty.</p>";
-  } else {
-    el.innerHTML = cart.map(item => `
-      <div class="cart-item" data-id="${escapeHtml(item.id)}">
-        ${item.image ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">` : `<div style="width:60px;height:60px;background:#eee;border-radius:6px"></div>`}
-        <div class="meta">
-          <h4>${escapeHtml(item.name)}</h4>
-          <div class="price">$${Number(item.price).toFixed(2)}</div>
-        </div>
-        <div class="actions">
-          <input class="qty-input" type="number" min="1" max="999" value="${item.qty}" data-id="${escapeHtml(item.id)}">
-          <button class="remove-item" data-id="${escapeHtml(item.id)}">Remove</button>
-        </div>
-      </div>
-    `).join("");
-  }
-
-  document.getElementById("cart-subtotal").textContent=`$${cartSubtotal().toFixed(2)}`;
-
-  document.querySelectorAll(".qty-input").forEach(input => {
-    input.addEventListener("change", e => {
-      const id = e.currentTarget.dataset.id;
-      const v = parseInt(e.currentTarget.value)||1;
-      const it = cart.find(x=>x.id===id);
-      if(it) it.qty=Math.max(1,Math.min(999,v));
-      saveCart();
-    });
-  });
-  document.querySelectorAll(".remove-item").forEach(btn => {
-    btn.addEventListener("click", e => {
-      const id = e.currentTarget.dataset.id;
-      cart = cart.filter(i=>i.id!==id);
-      saveCart();
-    });
-  });
-}
-
-// ---------- CART PANEL ----------
-const cartBtn = document.getElementById("cart-btn");
-const cartPanel = document.getElementById("cart-panel");
-const closeCart = document.getElementById("close-cart");
-
-cartBtn.addEventListener("click", ()=>openCart());
-closeCart.addEventListener("click", ()=>closeCartPanel());
-
-function openCart(){
-  cartPanel.classList.remove("closed");
-  cartPanel.classList.add("open");
-  cartPanel.setAttribute("aria-hidden","false");
-  renderCart();
-}
-function closeCartPanel(){
-  cartPanel.classList.remove("open");
-  cartPanel.classList.add("closed");
-  cartPanel.setAttribute("aria-hidden","true");
-}
-
-// ---------- CHECKOUT ----------
-document.getElementById("checkout-btn").addEventListener("click", async ()=>{
-  if(!WEB_APP_URL){
-    alert("Checkout not configured.");
-    return;
-  }
-  if(cart.length===0){ alert("Cart is empty."); return; }
-
-  const name=document.getElementById("customer-name").value.trim();
-  const contact=document.getElementById("customer-phone").value.trim();
-  if(!name){ alert("Enter your name."); return; }
-
-  const payload={
-    timestamp: new Date().toISOString(),
-    customerName:name,
-    customerContact:contact,
-    items: cart.map(i=>({id:i.id,name:i.name,price:Number(i.price),qty:i.qty})),
-    subtotal: cartSubtotal()
-  };
-
-  try{
-    const resp=await fetch(WEB_APP_URL,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(payload)
-    });
-    const data=await resp.json();
-    if(!resp.ok) throw new Error(data?.error||"Server error");
-    alert("Order sent! We'll contact you.");
-    cart=[];
-    saveCart();
-    closeCartPanel();
-  }catch(err){
-    console.error("Checkout error:",err);
-    alert("Failed to send order. See console.");
-  }
-});
-
-// ---------- INIT ----------
-function init(){
-  loadProducts();
-  renderCart();
-  updateCartCount();
-}
-init();
+// Initialize page
+loadProducts();
