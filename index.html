@@ -12,15 +12,20 @@
   <nav class="toolbar">
     <a href="about.html">About Us</a>
     <a href="contact.html">Contact</a>
+    <a href="cart.html" id="go-to-cart">Cart (<span id="cart-count">0</span>)</a>
   </nav>
   <input type="text" id="search" placeholder="Search products...">
   <select id="category-filter"><option value="">All</option></select>
-  <a href="cart.html"><button id="view-cart">View Cart (<span id="cart-count">0</span>)</button></a>
 </header>
 
 <main>
   <div id="product-list"></div>
 </main>
+
+<div id="lightbox" class="hidden">
+  <span id="close">&times;</span>
+  <img id="lightbox-img">
+</div>
 
 <script>
 const sheetURL = "https://docs.google.com/spreadsheets/d/1gDRKAFFNtFlox6OyG8fr6y5PMRahFQLy_TQzXatJtwo/gviz/tq?tqx=out:json";
@@ -28,79 +33,65 @@ let products = [];
 let cart = JSON.parse(localStorage.getItem("site_cart_v1")||"[]");
 
 async function loadProducts(){
-  try {
-    const res = await fetch(sheetURL);
-    const text = await res.text();
-    const jsonData = JSON.parse(text.substring(47).slice(0,-2));
-    products = jsonData.table.rows.slice(1).map((r,i)=>({
-      id: r.c[0]?.v || "p"+i,
-      name: r.c[0]?.v || "Unnamed",
-      category: r.c[1]?.v || "",
-      price: parseFloat(r.c[2]?.v) || 0,
-      desc: r.c[3]?.v || "",
-      image: r.c[4]?.v || ""
-    }));
-    populateCategoryFilter();
-    displayProducts(products);
-    updateCartCount();
-  } catch(err) {
-    console.error(err);
-    document.getElementById("product-list").innerHTML = "<p>Failed to load products.</p>";
-  }
+ const r=await fetch(sheetURL);const t=await r.text();
+ const j=JSON.parse(t.substring(47).slice(0,-2));
+ products=j.table.rows.slice(1).map((r,i)=>({
+  id:r.c[0]?.v||"p"+i,
+  product:r.c[0]?.v||"",
+  category:r.c[1]?.v||"",
+  price:parseFloat(r.c[2]?.v)||0,
+  desc:r.c[3]?.v||"",
+  image:r.c[4]?.v||""
+ }));
+ populateCategoryFilter(); displayProducts(products); updateCartCount();
 }
 
 function displayProducts(list){
-  const container = document.getElementById("product-list");
-  container.innerHTML = list.map(p=>`
-    <div class="product" data-category="${p.category}">
-      ${p.image ? `<img src="${p.image}" alt="${p.name}">` : ""}
-      <h3>${p.name}</h3>
-      <p>${p.desc}</p>
-      <p>$${p.price.toFixed(2)}</p>
-      <div class="qty-box">
-        <label>Qty:</label>
-        <input type="number" min="1" value="1" id="qty-${p.id}">
-      </div>
-      <button onclick="addToCart('${p.id}')">Add to Cart</button>
-    </div>
-  `).join("");
+ document.getElementById("product-list").innerHTML=list.map(p=>`
+ <div class="product">
+ ${p.image?`<img src="${p.image}">`:""}
+ <h3>${p.product}</h3><p>${p.desc}</p><p>$${p.price.toFixed(2)}</p>
+ <input type="number" min="1" value="1" id="qty-${p.id}">
+ <button onclick="addToCart('${p.id}')">Add to Cart</button>
+ </div>`).join("");
 }
 
 function addToCart(id){
-  const p = products.find(x=>x.id===id);
-  const qty = Math.max(1, parseInt(document.getElementById(`qty-${id}`).value) || 1);
-  const existing = cart.find(i=>i.id===id);
-  if(existing) existing.qty += qty;
-  else cart.push({...p, qty});
-  localStorage.setItem("site_cart_v1", JSON.stringify(cart));
-  updateCartCount();
+ const p = products.find(x=>x.id===id);
+ const qty = Math.max(1, parseInt(document.getElementById(`qty-${id}`).value)||1);
+ const existing = cart.find(i=>i.id===id);
+ if(existing) existing.qty += qty;
+ else cart.push({id:p.id, product:p.product, price:p.price, qty:qty});
+ localStorage.setItem("site_cart_v1", JSON.stringify(cart));
+ updateCartCount();
 }
 
 function updateCartCount(){
-  document.getElementById("cart-count").textContent = cart.reduce((s,i)=>s+(i.qty||0),0);
+ document.getElementById("cart-count").textContent = cart.reduce((s,i)=>s+i.qty,0);
 }
 
-// Category filter
 function populateCategoryFilter(){
-  const s = document.getElementById("category-filter");
-  s.innerHTML = '<option value="">All</option>';
-  [...new Set(products.map(p=>p.category).filter(Boolean))].forEach(c=>{
-    const o=document.createElement("option"); o.value=c; o.textContent=c; s.appendChild(o);
-  });
+ const s = document.getElementById("category-filter");
+ [...new Set(products.map(p=>p.category).filter(Boolean))].forEach(c=>{
+  const o=document.createElement("option"); o.value=c; o.textContent=c; s.appendChild(o);
+ });
 }
 
-// Search & filter
 document.getElementById("search").addEventListener("input", e=>{
-  const term = e.target.value.toLowerCase();
-  displayProducts(products.filter(p=>p.name.toLowerCase().includes(term) || p.desc.toLowerCase().includes(term) || p.category.toLowerCase().includes(term)));
+ const term = e.target.value.toLowerCase();
+ displayProducts(products.filter(p=>p.product.toLowerCase().includes(term)||p.desc.toLowerCase().includes(term)||p.category.toLowerCase().includes(term)));
 });
+
 document.getElementById("category-filter").addEventListener("change", e=>{
-  const cat = e.target.value;
-  displayProducts(cat ? products.filter(p=>p.category===cat) : products);
+ const cat = e.target.value;
+ displayProducts(cat ? products.filter(p=>p.category===cat) : products);
+});
+
+document.getElementById("go-to-cart").addEventListener("click", e=>{
+ localStorage.setItem("site_cart_v1", JSON.stringify(cart));
 });
 
 loadProducts();
-updateCartCount();
 </script>
 </body>
 </html>
