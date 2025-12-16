@@ -6,37 +6,44 @@
 <title>Cart - Allied Health Scientific</title>
 <link rel="stylesheet" href="style.css">
 <style>
-body { font-family:'Arial', sans-serif; background:#f0f0f0; color:#333; margin:0; padding:20px; }
-h1 { text-align:center; margin-bottom:20px; }
-#cart-items { max-width:900px; margin:0 auto 20px; background:#fff; border-radius:8px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.1);}
-.cart-item { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:15px 0; }
-.cart-item:last-child { border-bottom:none; }
-.cart-item h4 { margin:0; font-size:18px; }
-.cart-item p { margin:0 10px 0 0; font-size:16px; color:#666; }
-.qty-input { width:60px; padding:5px; border:1px solid #ccc; border-radius:4px; margin-right:10px; }
-button { background:#007BFF; color:#fff; border:none; border-radius:4px; padding:7px 12px; cursor:pointer; font-size:14px; }
-button:hover { background:#0056b3; }
-#checkoutForm { max-width:900px; margin:0 auto; background:#fff; padding:20px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1);}
-#checkoutForm label { display:block; margin-bottom:5px; font-weight:bold; }
-#checkoutForm input { width:100%; padding:8px; margin-bottom:15px; border-radius:4px; border:1px solid #ccc; }
-#cart-subtotal { font-weight:bold; font-size:18px; text-align:right; margin:10px auto; max-width:900px; }
-#status { text-align:center; margin-top:15px; font-weight:bold; color:green; }
+body{font-family:Arial,sans-serif;background:#f9f9f9;margin:0;padding:0;}
+header{background:#2b2b2b;color:#fff;padding:1em;}
+header h1{margin:0;}
+main{padding:1em;}
+.cart-item{border:1px solid #ddd;padding:0.5em;margin-bottom:0.5em;background:#fff;}
+.cart-item h4{margin:0 0 0.3em 0;}
+.cart-item p{margin:0.2em 0;}
+button{background:#2b2b2b;color:#fff;border:none;padding:0.5em;cursor:pointer;}
+button:hover{background:#444;}
+input.qty-input{width:50px;}
+form label{display:block;margin-top:0.5em;}
+form input{width:100%;padding:0.3em;margin-top:0.2em;}
 </style>
 </head>
 <body>
-<h1>Your Cart</h1>
-<div id="cart-items"></div>
-<p>Subtotal: $<span id="cart-subtotal">0.00</span></p>
+<header>
+  <div class="logo-container"><h1>Allied Health Scientific</h1></div>
+  <nav class="toolbar">
+    <a href="index.html">Home</a>
+    <a href="about.html">About Us</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+  <p>Cart Items: <span id="cart-count">0</span></p>
+</header>
 
-<form id="checkoutForm" method="POST" target="hiddenFrame" action="https://script.google.com/macros/s/AKfycby4KNN--49uttnqyLgqaJToGcBZ-9MeemMjQuegvMNzWoHqdxcacFJAsTCZVgBJgwl95w/exec">
-<label>Name</label><input type="text" name="customerName" required>
-<label>Email</label><input type="email" name="customerEmail" required>
-<label>Phone</label><input type="text" name="customerPhone" required>
-<button type="submit">Checkout / Get Quote</button>
-</form>
+<main>
+  <div id="cart-items"></div>
+  <p>Subtotal: $<span id="cart-subtotal">0.00</span></p>
 
-<iframe name="hiddenFrame" style="display:none"></iframe>
-<p id="status"></p>
+  <form id="checkoutForm" method="POST" action="https://script.google.com/macros/s/AKfycby4KNN--49uttnqyLgqaJToGcBZ-9MeemMjQuegvMNzWoHqdxcacFJAsTCZVgBJgwl95w/exec">
+    <label>Name</label><input type="text" name="customerName" required>
+    <label>Email</label><input type="email" name="customerEmail" required>
+    <label>Phone</label><input type="text" name="customerPhone" required>
+    <input type="hidden" name="items" id="cartData">
+    <button type="submit">Checkout / Get Quote</button>
+  </form>
+  <p id="status"></p>
+</main>
 
 <script>
 let cart = JSON.parse(localStorage.getItem("site_cart_v1")||"[]");
@@ -44,25 +51,33 @@ let cart = JSON.parse(localStorage.getItem("site_cart_v1")||"[]");
 function updateCart() {
   const el = document.getElementById("cart-items");
   const subtotalEl = document.getElementById("cart-subtotal");
-  if(cart.length===0){ el.innerHTML="<p>Your cart is empty.</p>"; subtotalEl.textContent="0.00"; return; }
+  const countEl = document.getElementById("cart-count");
 
-  el.innerHTML = cart.map(item => `
+  if(cart.length===0){
+    el.innerHTML="<p>Your cart is empty.</p>";
+    subtotalEl.textContent="0.00";
+    countEl.textContent="0";
+    return;
+  }
+
+  el.innerHTML = cart.map(item=>`
     <div class="cart-item">
       <h4>${item.name}</h4>
-      <p>Price: $${(parseFloat(item.price)||0).toFixed(2)}</p>
+      <p>Price: $${item.price.toFixed(2)}</p>
       <input type="number" min="1" value="${item.qty}" data-id="${item.id}" class="qty-input">
       <button class="remove-item" data-id="${item.id}">Remove</button>
     </div>
   `).join("");
 
-  subtotalEl.textContent = cart.reduce((s,i)=>s+(parseFloat(i.price)||0)*i.qty,0).toFixed(2);
+  subtotalEl.textContent = cart.reduce((s,i)=>s+(i.price*i.qty),0).toFixed(2);
+  countEl.textContent = cart.reduce((s,i)=>s+i.qty,0);
 
   document.querySelectorAll(".qty-input").forEach(input=>{
     input.addEventListener("change", e=>{
       const id = e.target.dataset.id;
       const qty = Math.max(1, parseInt(e.target.value)||1);
       const item = cart.find(i=>i.id===id);
-      if(item) item.qty=qty;
+      if(item) item.qty = qty;
       localStorage.setItem("site_cart_v1", JSON.stringify(cart));
       updateCart();
     });
@@ -78,36 +93,25 @@ function updateCart() {
   });
 }
 
-updateCart();
-
 document.getElementById("checkoutForm").addEventListener("submit", function(e){
   e.preventDefault();
   const form = e.target;
-  if(cart.length===0){ alert("Cart is empty."); return; }
+  document.getElementById("cartData").value = JSON.stringify(cart);
 
-  const params = new URLSearchParams();
-  params.append("customerName", form.customerName.value);
-  params.append("customerEmail", form.customerEmail.value);
-  params.append("customerPhone", form.customerPhone.value);
-
-  cart.forEach((item,index)=>{
-    params.append(`items[${index}][product]`, item.name);
-    params.append(`items[${index}][price]`, item.price);
-    params.append(`items[${index}][qty]`, item.qty);
-  });
-
-  fetch(form.action,{method:"POST",body:params})
-  .then(r=>r.text())
-  .then(t=>{
+  fetch(form.action, {
+    method:"POST",
+    body:new URLSearchParams(new FormData(form))
+  }).then(r=>r.text()).then(t=>{
     document.getElementById("status").textContent="Quote sent successfully.";
     cart=[];
     localStorage.setItem("site_cart_v1", JSON.stringify(cart));
     updateCart();
-  })
-  .catch(err=>{
+  }).catch(err=>{
     document.getElementById("status").textContent="Error sending quote.";
   });
 });
+
+updateCart();
 </script>
 </body>
 </html>
