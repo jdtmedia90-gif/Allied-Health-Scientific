@@ -27,7 +27,7 @@
   <p>Subtotal: $<span id="cart-subtotal">0.00</span></p>
 
   <form id="checkoutForm" method="POST" target="hiddenFrame" action="https://script.google.com/macros/s/AKfycby4KNN--49uttnqyLgqaJToGcBZ-9MeemMjQuegvMNzWoHqdxcacFJAsTCZVgBJgwl95w/exec">
-    <input type="hidden" name="items">
+    <input type="hidden" name="items" id="cartData">
     <label>Name</label><input type="text" name="customerName" required>
     <label>Email</label><input type="email" name="customerEmail" required>
     <label>Phone</label><input type="text" name="customerPhone" required>
@@ -94,12 +94,12 @@ function populateCategoryFilter(){
 document.getElementById("cart-btn").onclick=()=>cartPanel.classList.add("open");
 document.getElementById("close-cart").onclick=()=>cartPanel.classList.remove("open");
 
-document.getElementById("checkoutForm").addEventListener("submit",e=>{
- e.target.items.value=JSON.stringify(cart.map(i=>({
-  product:i.name,price:i.price,qty:i.qty,total:i.price*i.qty
- })));
- document.getElementById("status").textContent="Sending quote request...";
- cart=[];saveCart();});
+document.getElementById("checkoutForm").addEventListener("submit", function(e){
+ document.getElementById("cartData").value = JSON.stringify(cart);
+ cart = [];
+ saveCart();
+ document.getElementById("status").textContent = "Sending quote request...";
+});
 
 loadProducts();updateCart();
 </script>
