@@ -3,31 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Allied Health Scientific</title>
+<title>Allied Health Scientific - Cart</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header>
   <div class="logo-container"><h1>Allied Health Scientific</h1></div>
   <nav class="toolbar">
-    <a href="about.html">About Us</a>
+    <a href="index.html">Products</a>
     <a href="contact.html">Contact</a>
+    <a href="cart.html">Cart (<span id="cart-count">0</span>)</a>
   </nav>
   <input type="text" id="search" placeholder="Search products...">
   <select id="category-filter"><option value="">All</option></select>
-  <button id="cart-btn">Cart (<span id="cart-count">0</span>)</button>
 </header>
 
-<main><div id="product-list"></div></main>
-
-<div id="cart-panel">
-  <button id="close-cart">Close</button>
+<main>
   <h2>Your Cart</h2>
   <div id="cart-items"></div>
   <p>Subtotal: $<span id="cart-subtotal">0.00</span></p>
 
   <form id="checkoutForm" method="POST" target="hiddenFrame" action="https://script.google.com/macros/s/AKfycby4KNN--49uttnqyLgqaJToGcBZ-9MeemMjQuegvMNzWoHqdxcacFJAsTCZVgBJgwl95w/exec">
-    <input type="hidden" name="items" id="cartData">
     <label>Name</label><input type="text" name="customerName" required>
     <label>Email</label><input type="email" name="customerEmail" required>
     <label>Phone</label><input type="text" name="customerPhone" required>
@@ -35,73 +31,84 @@
   </form>
   <iframe name="hiddenFrame" style="display:none"></iframe>
   <p id="status"></p>
-</div>
-
-<div id="lightbox" class="hidden">
-  <span id="close">&times;</span>
-  <img id="lightbox-img">
-</div>
+</main>
 
 <script>
-const cartPanel = document.getElementById("cart-panel");
-const sheetURL = "https://docs.google.com/spreadsheets/d/1gDRKAFFNtFlox6OyG8fr6y5PMRahFQLy_TQzXatJtwo/gviz/tq?tqx=out:json";
-let products = [];
 let cart = JSON.parse(localStorage.getItem("site_cart_v1")||"[]");
 
-async function loadProducts(){
- const r=await fetch(sheetURL);const t=await r.text();
- const j=JSON.parse(t.substring(47).slice(0,-2));
- products=j.table.rows.slice(1).map((r,i)=>({
-  id:r.c[0]?.v||"p"+i,
-  name:r.c[0]?.v||"",
-  category:r.c[1]?.v||"",
-  price:parseFloat(r.c[2]?.v)||0,
-  desc:r.c[3]?.v||"",
-  image:r.c[4]?.v||""
- }));
- populateCategoryFilter();displayProducts(products);updateCart();}
-
-function displayProducts(list){
- document.getElementById("product-list").innerHTML=list.map(p=>`
- <div class="product">
- ${p.image?`<img src="${p.image}">`:""}
- <h3>${p.name}</h3><p>${p.desc}</p><p>$${p.price.toFixed(2)}</p>
- <input type="number" min="1" value="1" id="qty-${p.id}">
- <button onclick="addToCart('${p.id}')">Add to Cart</button>
- </div>`).join("");}
-
-function addToCart(id){
- const p=products.find(x=>x.id===id);
- const q=Math.max(1,parseInt(document.getElementById(`qty-${id}`).value)||1);
- const e=cart.find(i=>i.id===id);
- e?e.qty+=q:cart.push({...p,qty:q});saveCart();}
-
-function saveCart(){localStorage.setItem("site_cart_v1",JSON.stringify(cart));updateCart();}
-
 function updateCart(){
- document.getElementById("cart-count").textContent=cart.reduce((s,i)=>s+i.qty,0);
- document.getElementById("cart-subtotal").textContent=cart.reduce((s,i)=>s+i.price*i.qty,0).toFixed(2);
- document.getElementById("cart-items").innerHTML=cart.map(i=>`
- <div>${i.name} (${i.qty}) - $${(i.price*i.qty).toFixed(2)} <button onclick="removeItem('${i.id}')">X</button></div>`).join("")||"Cart empty";}
+  const el = document.getElementById("cart-items");
+  const subtotalEl = document.getElementById("cart-subtotal");
+  const countEl = document.getElementById("cart-count");
 
-function removeItem(id){cart=cart.filter(i=>i.id!==id);saveCart();}
+  if(cart.length === 0){
+    el.innerHTML = "<p>Your cart is empty.</p>";
+    subtotalEl.textContent = "0.00";
+    countEl.textContent = "0";
+    return;
+  }
 
-function populateCategoryFilter(){
- const s=document.getElementById("category-filter");
- [...new Set(products.map(p=>p.category).filter(Boolean))].forEach(c=>{
-  const o=document.createElement("option");o.value=c;o.textContent=c;s.appendChild(o);});}
+  el.innerHTML = cart.map(item => `
+    <div class="cart-item">
+      <h4>${item.name}</h4>
+      <p>Price: $${item.price.toFixed(2)}</p>
+      <input type="number" min="1" value="${item.qty}" data-id="${item.id}" class="qty-input">
+      <button class="remove-item" data-id="${item.id}">Remove</button>
+    </div>
+  `).join("");
 
-document.getElementById("cart-btn").onclick=()=>cartPanel.classList.add("open");
-document.getElementById("close-cart").onclick=()=>cartPanel.classList.remove("open");
+  subtotalEl.textContent = cart.reduce((s,i)=>s+(i.price*i.qty),0).toFixed(2);
+  countEl.textContent = cart.reduce((s,i)=>s+i.qty,0);
 
+  document.querySelectorAll(".qty-input").forEach(input => {
+    input.addEventListener("change", e => {
+      const id = e.target.dataset.id;
+      const qty = Math.max(1, parseInt(e.target.value)||1);
+      const item = cart.find(i=>i.id===id);
+      if(item) item.qty = qty;
+      localStorage.setItem("site_cart_v1", JSON.stringify(cart));
+      updateCart();
+    });
+  });
+
+  document.querySelectorAll(".remove-item").forEach(btn => {
+    btn.addEventListener("click", e => {
+      const id = e.target.dataset.id;
+      cart = cart.filter(i=>i.id!==id);
+      localStorage.setItem("site_cart_v1", JSON.stringify(cart));
+      updateCart();
+    });
+  });
+}
+
+updateCart();
+
+// Submit form with each cart item as separate parameters
 document.getElementById("checkoutForm").addEventListener("submit", function(e){
- document.getElementById("cartData").value = JSON.stringify(cart);
- cart = [];
- saveCart();
- document.getElementById("status").textContent = "Sending quote request...";
-});
+  e.preventDefault();
+  const form = e.target;
+  const params = new URLSearchParams();
+  params.append("customerName", form.customerName.value);
+  params.append("customerEmail", form.customerEmail.value);
+  params.append("customerPhone", form.customerPhone.value);
+  cart.forEach((item, index) => {
+    params.append(`product_${index}`, item.name);
+    params.append(`price_${index}`, item.price);
+    params.append(`qty_${index}`, item.qty);
+  });
 
-loadProducts();updateCart();
+  fetch(form.action, {
+    method: "POST",
+    body: params
+  }).then(r=>r.text()).then(t=>{
+    document.getElementById("status").textContent = "Quote sent successfully.";
+    cart = [];
+    localStorage.setItem("site_cart_v1", JSON.stringify(cart));
+    updateCart();
+  }).catch(err=>{
+    document.getElementById("status").textContent = "Error sending quote.";
+  });
+});
 </script>
 </body>
 </html>
