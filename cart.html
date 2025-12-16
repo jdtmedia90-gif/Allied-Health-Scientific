@@ -21,11 +21,10 @@
   <div id="cart-items"></div>
   <p>Subtotal: $<span id="cart-subtotal">0.00</span></p>
 
-  <form id="checkoutForm" method="POST" action="https://script.google.com/macros/s/AKfycby4KNN--49uttnqyLgqaJToGcBZ-9MeemMjQuegvMNzWoHqdxcacFJAsTCZVgBJgwl95w/exec">
-    <label>Name</label><input type="text" name="customerName" required>
-    <label>Email</label><input type="email" name="customerEmail" required>
-    <label>Phone</label><input type="text" name="customerPhone" required>
-    <input type="hidden" name="items" id="cartData">
+  <form id="checkoutForm">
+    <label>Name</label><input type="text" id="customerName" required>
+    <label>Email</label><input type="email" id="customerEmail" required>
+    <label>Phone</label><input type="text" id="customerPhone" required>
     <button type="submit">Checkout / Get Quote</button>
   </form>
   <p id="status"></p>
@@ -79,21 +78,36 @@ function updateCart() {
   });
 }
 
-document.getElementById("checkoutForm").addEventListener("submit", function(e){
+document.getElementById("checkoutForm").addEventListener("submit", async function(e){
   e.preventDefault();
-  document.getElementById("cartData").value = JSON.stringify(cart);
+  const status = document.getElementById("status");
+  status.textContent = "Submitting...";
 
-  fetch(this.action, {
-    method:"POST",
-    body: new URLSearchParams(new FormData(this))
-  }).then(r=>r.text()).then(t=>{
-    document.getElementById("status").textContent="Quote sent successfully.";
-    cart=[];
-    localStorage.setItem("site_cart_v1", JSON.stringify(cart));
-    updateCart();
-  }).catch(err=>{
-    document.getElementById("status").textContent="Error sending quote.";
-  });
+  const payload = {
+    customerName: document.getElementById("customerName").value,
+    customerEmail: document.getElementById("customerEmail").value,
+    customerPhone: document.getElementById("customerPhone").value,
+    cart
+  };
+
+  try {
+    const response = await fetch('YOUR_NEW_GOOGLE_APPS_SCRIPT_WEB_APP_URL', {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+    if(result.success){
+      status.textContent = "Order submitted successfully!";
+      cart = [];
+      localStorage.setItem("site_cart_v1", JSON.stringify(cart));
+      updateCart();
+    } else {
+      status.textContent = "Error: " + result.message;
+    }
+  } catch(err) {
+    status.textContent = "Error submitting order.";
+  }
 });
 
 updateCart();
