@@ -4,17 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cart - Allied Health Scientific</title>
+<link rel="stylesheet" href="style.css">
 <style>
-body{font-family:Arial,sans-serif;margin:0;padding:20px;background:#f9f9f9;}
-h1,h2{margin:0 0 10px;}
-#cart-items{margin:20px 0;}
-.cart-item{background:#fff;padding:10px;margin-bottom:10px;border-radius:5px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 4px rgba(0,0,0,0.1);}
-.cart-item h4{margin:0;}
-.cart-item input{width:50px;}
-button{padding:5px 10px;margin-left:10px;cursor:pointer;}
-form{background:#fff;padding:20px;border-radius:5px;box-shadow:0 1px 4px rgba(0,0,0,0.1);max-width:400px;}
-label{display:block;margin-top:10px;}
-#status{margin-top:10px;font-weight:bold;}
+  body{font-family:sans-serif;padding:20px;}
+  .cart-item{border-bottom:1px solid #ccc;padding:10px 0;}
+  input.qty-input{width:50px;}
+  button{margin-left:5px;}
 </style>
 </head>
 <body>
@@ -22,13 +17,12 @@ label{display:block;margin-top:10px;}
 <div id="cart-items"></div>
 <p>Subtotal: $<span id="cart-subtotal">0.00</span></p>
 
-<form id="checkoutForm" method="POST" target="hiddenFrame" action="https://script.google.com/macros/s/AKfycby4KNN--49uttnqyLgqaJToGcBZ-9MeemMjQuegvMNzWoHqdxcacFJAsTCZVgBJgwl95w/exec">
-<label>Name</label><input type="text" name="customerName" required>
-<label>Email</label><input type="email" name="customerEmail" required>
-<label>Phone</label><input type="text" name="customerPhone" required>
+<form id="checkoutForm" method="POST" action="https://script.google.com/macros/s/AKfycby4KNN--49uttnqyLgqaJToGcBZ-9MeemMjQuegvMNzWoHqdxcacFJAsTCZVgBJgwl95w/exec">
+<label>Name</label><input type="text" name="customerName" required><br>
+<label>Email</label><input type="email" name="customerEmail" required><br>
+<label>Phone</label><input type="text" name="customerPhone" required><br>
 <button type="submit">Checkout / Get Quote</button>
 </form>
-
 <iframe name="hiddenFrame" style="display:none"></iframe>
 <p id="status"></p>
 
@@ -36,78 +30,60 @@ label{display:block;margin-top:10px;}
 let cart = JSON.parse(localStorage.getItem("site_cart_v1")||"[]");
 
 function updateCart(){
-  const el = document.getElementById("cart-items");
-  const subtotalEl = document.getElementById("cart-subtotal");
-  if(!el || !subtotalEl) return; // prevent null errors
-  if(cart.length===0){
-    el.innerHTML="<p>Your cart is empty.</p>";
-    subtotalEl.textContent="0.00";
-    return;
-  }
-  el.innerHTML = cart.map(item=>`
-    <div class="cart-item">
-      <div>
-        <h4>${item.name}</h4>
-        <p>Price: $${item.price.toFixed(2)}</p>
-      </div>
-      <div>
-        <input type="number" min="1" value="${item.qty}" data-id="${item.id}" class="qty-input">
-        <button class="remove-item" data-id="${item.id}">Remove</button>
-      </div>
-    </div>
-  `).join("");
-  subtotalEl.textContent = cart.reduce((s,i)=>s+(i.price*i.qty),0).toFixed(2);
+ const el=document.getElementById("cart-items");
+ const subtotalEl=document.getElementById("cart-subtotal");
+ if(cart.length===0){ el.innerHTML="<p>Your cart is empty.</p>"; subtotalEl.textContent="0.00"; return; }
+ el.innerHTML=cart.map(item=>`
+  <div class="cart-item">
+   <h4>${item.product}</h4>
+   <p>Price: $${item.price.toFixed(2)}</p>
+   <input type="number" min="1" value="${item.qty}" data-id="${item.id}" class="qty-input">
+   <button class="remove-item" data-id="${item.id}">Remove</button>
+  </div>
+ `).join("");
+ subtotalEl.textContent=cart.reduce((s,i)=>s+(i.price*i.qty),0).toFixed(2);
 
-  // Quantity change
-  document.querySelectorAll(".qty-input").forEach(input=>{
-    input.addEventListener("change", e=>{
-      const id = e.target.dataset.id;
-      const qty = Math.max(1, parseInt(e.target.value)||1);
-      const item = cart.find(i=>i.id===id);
-      if(item) item.qty=qty;
-      localStorage.setItem("site_cart_v1", JSON.stringify(cart));
-      updateCart();
-    });
+ document.querySelectorAll(".qty-input").forEach(input=>{
+  input.addEventListener("change", e=>{
+   const id=e.target.dataset.id;
+   const qty=Math.max(1,parseInt(e.target.value)||1);
+   const item=cart.find(i=>i.id===id);
+   if(item) item.qty=qty;
+   localStorage.setItem("site_cart_v1", JSON.stringify(cart));
+   updateCart();
   });
+ });
 
-  // Remove item
-  document.querySelectorAll(".remove-item").forEach(btn=>{
-    btn.addEventListener("click", e=>{
-      const id = e.target.dataset.id;
-      cart = cart.filter(i=>i.id!==id);
-      localStorage.setItem("site_cart_v1", JSON.stringify(cart));
-      updateCart();
-    });
+ document.querySelectorAll(".remove-item").forEach(btn=>{
+  btn.addEventListener("click", e=>{
+   const id=e.target.dataset.id;
+   cart=cart.filter(i=>i.id!==id);
+   localStorage.setItem("site_cart_v1", JSON.stringify(cart));
+   updateCart();
   });
+ });
 }
 
 updateCart();
 
 document.getElementById("checkoutForm").addEventListener("submit", function(e){
-  e.preventDefault();
-  if(cart.length===0){document.getElementById("status").textContent="Cart is empty."; return;}
-  const form = e.target;
-  const params = new URLSearchParams();
-  params.append("customerName", form.customerName.value);
-  params.append("customerEmail", form.customerEmail.value);
-  params.append("customerPhone", form.customerPhone.value);
-  cart.forEach((item,index)=>{
-    params.append(`product_${index}`, item.name);
-    params.append(`price_${index}`, item.price);
-    params.append(`qty_${index}`, item.qty);
-  });
-  fetch(form.action,{method:"POST",body:params})
-    .then(r=>r.text())
-    .then(t=>{
-      document.getElementById("status").textContent="Quote sent successfully.";
-      cart=[];
-      localStorage.setItem("site_cart_v1", JSON.stringify(cart));
-      updateCart();
-    })
-    .catch(err=>{
-      document.getElementById("status").textContent="Error sending quote.";
-      console.error(err);
-    });
+ e.preventDefault();
+ const form = e.target;
+ const params = new URLSearchParams();
+ params.append("customerName", form.customerName.value);
+ params.append("customerEmail", form.customerEmail.value);
+ params.append("customerPhone", form.customerPhone.value);
+ params.append("items", JSON.stringify(cart));
+
+ fetch(form.action, {
+  method: "POST",
+  body: params,
+  headers: {'Content-Type':'application/x-www-form-urlencoded'}
+ }).then(r=>r.text()).then(t=>{
+  document.getElementById("status").textContent="Quote sent successfully.";
+  cart=[]; localStorage.setItem("site_cart_v1", JSON.stringify(cart));
+  updateCart();
+ }).catch(err=>{document.getElementById("status").textContent="Error sending quote."});
 });
 </script>
 </body>
