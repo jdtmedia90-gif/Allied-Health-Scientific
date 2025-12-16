@@ -8,23 +8,17 @@
 </head>
 <body>
 <header>
-  <div class="logo-container">
-    <h1>Allied Health Scientific</h1>
-  </div>
+  <div class="logo-container"><h1>Allied Health Scientific</h1></div>
   <nav class="toolbar">
     <a href="about.html">About Us</a>
     <a href="contact.html">Contact</a>
   </nav>
   <input type="text" id="search" placeholder="Search products...">
-  <select id="category-filter">
-    <option value="">All</option>
-  </select>
+  <select id="category-filter"><option value="">All</option></select>
   <button id="cart-btn">Cart (<span id="cart-count">0</span>)</button>
 </header>
 
-<main>
-  <div id="product-list"></div>
-</main>
+<main><div id="product-list"></div></main>
 
 <div id="cart-panel">
   <button id="close-cart">Close</button>
@@ -33,196 +27,81 @@
   <p>Subtotal: $<span id="cart-subtotal">0.00</span></p>
 
   <form id="checkoutForm" method="POST" target="hiddenFrame" action="https://script.google.com/macros/s/AKfycby4KNN--49uttnqyLgqaJToGcBZ-9MeemMjQuegvMNzWoHqdxcacFJAsTCZVgBJgwl95w/exec">
-    <input type="hidden" name="cartData" id="cartData">
+    <input type="hidden" name="items">
     <label>Name</label><input type="text" name="customerName" required>
     <label>Email</label><input type="email" name="customerEmail" required>
     <label>Phone</label><input type="text" name="customerPhone" required>
-    <button type="submit">Checkout</button>
+    <button type="submit">Checkout / Get Quote</button>
   </form>
-  <iframe name="hiddenFrame" style="display:none;"></iframe>
+  <iframe name="hiddenFrame" style="display:none"></iframe>
   <p id="status"></p>
 </div>
 
 <div id="lightbox" class="hidden">
   <span id="close">&times;</span>
-  <img id="lightbox-img" src="" alt="Product Image">
+  <img id="lightbox-img">
 </div>
 
 <script>
+const cartPanel = document.getElementById("cart-panel");
 const sheetURL = "https://docs.google.com/spreadsheets/d/1gDRKAFFNtFlox6OyG8fr6y5PMRahFQLy_TQzXatJtwo/gviz/tq?tqx=out:json";
-
 let products = [];
-let cart = loadCart();
+let cart = JSON.parse(localStorage.getItem("site_cart_v1")||"[]");
 
-async function loadProducts() {
-  try {
-    const res = await fetch(sheetURL);
-    const text = await res.text();
-    const jsonData = JSON.parse(text.substring(47).slice(0, -2));
-    const rows = jsonData.table.rows;
+async function loadProducts(){
+ const r=await fetch(sheetURL);const t=await r.text();
+ const j=JSON.parse(t.substring(47).slice(0,-2));
+ products=j.table.rows.slice(1).map((r,i)=>({
+  id:r.c[0]?.v||"p"+i,
+  name:r.c[0]?.v||"",
+  category:r.c[1]?.v||"",
+  price:parseFloat(r.c[2]?.v)||0,
+  desc:r.c[3]?.v||"",
+  image:r.c[4]?.v||""
+ }));
+ populateCategoryFilter();displayProducts(products);updateCart();}
 
-    products = rows.slice(1).map((r, i) => ({
-      id: r.c[0]?.v?.toString() || "p" + i,
-      name: r.c[0]?.v || "Unnamed",
-      category: r.c[1]?.v || "",
-      price: parseFloat(r.c[2]?.v) || 0,
-      desc: r.c[3]?.v || "",
-      image: r.c[4]?.v || ""
-    }));
+function displayProducts(list){
+ document.getElementById("product-list").innerHTML=list.map(p=>`
+ <div class="product">
+ ${p.image?`<img src="${p.image}">`:""}
+ <h3>${p.name}</h3><p>${p.desc}</p><p>$${p.price.toFixed(2)}</p>
+ <input type="number" min="1" value="1" id="qty-${p.id}">
+ <button onclick="addToCart('${p.id}')">Add to Cart</button>
+ </div>`).join("");}
 
-    populateCategoryFilter();
-    displayProducts(products);
-    updateCartCount();
-  } catch (err) {
-    console.error("Error loading products:", err);
-    document.getElementById("product-list").innerHTML = "<p>Failed to load products.</p>";
-  }
-}
+function addToCart(id){
+ const p=products.find(x=>x.id===id);
+ const q=Math.max(1,parseInt(document.getElementById(`qty-${id}`).value)||1);
+ const e=cart.find(i=>i.id===id);
+ e?e.qty+=q:cart.push({...p,qty:q});saveCart();}
 
-function displayProducts(list) {
-  const container = document.getElementById("product-list");
-  container.innerHTML = list.map(p => `
-    <div class="product" data-category="${p.category}">
-      ${p.image ? `<img src="${p.image}" alt="${p.name}">` : ""}
-      <h3>${p.name}</h3>
-      <p class="desc">${p.desc}</p>
-      <p class="price">$${p.price.toFixed(2)}</p>
-      <div class="qty-box">
-        <label>Qty:</label>
-        <input type="number" min="1" value="1" id="qty-${p.id}">
-      </div>
-      <button onclick="addToCartFromInput('${p.id}')">Add to Cart</button>
-    </div>
-  `).join("");
+function saveCart(){localStorage.setItem("site_cart_v1",JSON.stringify(cart));updateCart();}
 
-  document.querySelectorAll(".product img").forEach(img => {
-    img.addEventListener("click", () => openLightbox(img.src));
-  });
-}
+function updateCart(){
+ document.getElementById("cart-count").textContent=cart.reduce((s,i)=>s+i.qty,0);
+ document.getElementById("cart-subtotal").textContent=cart.reduce((s,i)=>s+i.price*i.qty,0).toFixed(2);
+ document.getElementById("cart-items").innerHTML=cart.map(i=>`
+ <div>${i.name} (${i.qty}) - $${(i.price*i.qty).toFixed(2)} <button onclick="removeItem('${i.id}')">X</button></div>`).join("")||"Cart empty";}
 
-function addToCartFromInput(id) {
-  const product = products.find(p => p.id === id);
-  const qtyInput = document.getElementById(`qty-${id}`);
-  let qty = parseInt(qtyInput.value);
-  if (!qty || qty < 1) qty = 1;
+function removeItem(id){cart=cart.filter(i=>i.id!==id);saveCart();}
 
-  const existing = cart.find(i => i.id === id);
-  if (existing) existing.qty += qty;
-  else cart.push({...product, qty});
+function populateCategoryFilter(){
+ const s=document.getElementById("category-filter");
+ [...new Set(products.map(p=>p.category).filter(Boolean))].forEach(c=>{
+  const o=document.createElement("option");o.value=c;o.textContent=c;s.appendChild(o);});}
 
-  saveCart();
-}
+document.getElementById("cart-btn").onclick=()=>cartPanel.classList.add("open");
+document.getElementById("close-cart").onclick=()=>cartPanel.classList.remove("open");
 
-function loadCart() {
-  const raw = localStorage.getItem("site_cart_v1");
-  return raw ? JSON.parse(raw) : [];
-}
+document.getElementById("checkoutForm").addEventListener("submit",e=>{
+ e.target.items.value=JSON.stringify(cart.map(i=>({
+  product:i.name,price:i.price,qty:i.qty,total:i.price*i.qty
+ })));
+ document.getElementById("status").textContent="Sending quote request...";
+ cart=[];saveCart();});
 
-function saveCart() {
-  localStorage.setItem("site_cart_v1", JSON.stringify(cart));
-  updateCartCount();
-  renderCart();
-}
-
-function updateCartCount() {
-  const count = cart.reduce((s,i) => s + (i.qty||0), 0);
-  document.getElementById("cart-count").textContent = count;
-}
-
-function cartSubtotal() {
-  return cart.reduce((s,i) => s + (i.price||0)*(i.qty||0),0);
-}
-
-function renderCart() {
-  const el = document.getElementById("cart-items");
-  if(cart.length===0){
-    el.innerHTML="<p>Your cart is empty.</p>";
-    document.getElementById("cart-subtotal").textContent="0.00";
-    return;
-  }
-
-  el.innerHTML = cart.map(item => `
-    <div class="cart-item">
-      ${item.image ? `<img src="${item.image}" alt="${item.name}">` : ""}
-      <div class="meta">
-        <h4>${item.name}</h4>
-        <div class="price">$${item.price.toFixed(2)}</div>
-      </div>
-      <div class="actions">
-        <input type="number" min="1" value="${item.qty}" data-id="${item.id}" class="qty-input">
-        <button class="remove-item" data-id="${item.id}">Remove</button>
-      </div>
-    </div>
-  `).join("");
-
-  document.getElementById("cart-subtotal").textContent = cartSubtotal().toFixed(2);
-
-  document.querySelectorAll(".qty-input").forEach(input => {
-    input.addEventListener("change", e=>{
-      const id = e.currentTarget.dataset.id;
-      const qty = Math.max(1, parseInt(e.currentTarget.value)||1);
-      const item = cart.find(i=>i.id===id);
-      if(item) item.qty=qty;
-      saveCart();
-    });
-  });
-
-  document.querySelectorAll(".remove-item").forEach(btn=>{
-    btn.addEventListener("click", e=>{
-      const id = e.currentTarget.dataset.id;
-      cart = cart.filter(i=>i.id!==id);
-      saveCart();
-    });
-  });
-}
-
-document.getElementById("cart-btn").addEventListener("click",()=>cartPanel.classList.add("open"));
-document.getElementById("close-cart").addEventListener("click",()=>cartPanel.classList.remove("open"));
-
-document.getElementById("category-filter").addEventListener("change",e=>{
-  const cat = e.target.value;
-  const filtered = cat ? products.filter(p=>p.category===cat) : products;
-  displayProducts(filtered);
-});
-
-document.getElementById("search").addEventListener("input",e=>{
-  const term = e.target.value.toLowerCase();
-  const filtered = products.filter(p=>
-    p.name.toLowerCase().includes(term) ||
-    p.desc.toLowerCase().includes(term) ||
-    p.category.toLowerCase().includes(term)
-  );
-  displayProducts(filtered);
-});
-
-function populateCategoryFilter() {
-  const select = document.getElementById("category-filter");
-  select.innerHTML='<option value="">All</option>';
-  const categories = [...new Set(products.map(p=>p.category).filter(c=>c))];
-  categories.forEach(c=>{
-    const opt=document.createElement("option");
-    opt.value=c;
-    opt.textContent=c;
-    select.appendChild(opt);
-  });
-}
-
-function openLightbox(src){
-  document.getElementById("lightbox").classList.remove("hidden");
-  document.getElementById("lightbox-img").src=src;
-}
-document.getElementById("close").addEventListener("click",()=>document.getElementById("lightbox").classList.add("hidden"));
-
-// Submit cart form like job application
-document.getElementById("checkoutForm").addEventListener("submit", function(e){
-  document.getElementById("cartData").value = JSON.stringify(cart);
-  cart = [];
-  saveCart();
-  document.getElementById("status").textContent = "Submitting order...";
-});
-loadProducts();
-renderCart();
-updateCartCount();
+loadProducts();updateCart();
 </script>
 </body>
 </html>
