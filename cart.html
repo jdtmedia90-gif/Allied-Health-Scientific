@@ -5,20 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cart - Allied Health Scientific</title>
 <link rel="stylesheet" href="style.css">
-<style>
-body{font-family:Arial,sans-serif;background:#f9f9f9;margin:0;padding:0;}
-header{background:#2b2b2b;color:#fff;padding:1em;}
-header h1{margin:0;}
-main{padding:1em;}
-.cart-item{border:1px solid #ddd;padding:0.5em;margin-bottom:0.5em;background:#fff;}
-.cart-item h4{margin:0 0 0.3em 0;}
-.cart-item p{margin:0.2em 0;}
-button{background:#2b2b2b;color:#fff;border:none;padding:0.5em;cursor:pointer;}
-button:hover{background:#444;}
-input.qty-input{width:50px;}
-form label{display:block;margin-top:0.5em;}
-form input{width:100%;padding:0.3em;margin-top:0.2em;}
-</style>
 </head>
 <body>
 <header>
@@ -95,12 +81,11 @@ function updateCart() {
 
 document.getElementById("checkoutForm").addEventListener("submit", function(e){
   e.preventDefault();
-  const form = e.target;
   document.getElementById("cartData").value = JSON.stringify(cart);
 
-  fetch(form.action, {
+  fetch(this.action, {
     method:"POST",
-    body:new URLSearchParams(new FormData(form))
+    body: new URLSearchParams(new FormData(this))
   }).then(r=>r.text()).then(t=>{
     document.getElementById("status").textContent="Quote sent successfully.";
     cart=[];
