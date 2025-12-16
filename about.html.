@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Us - Allied Health Scientific</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f8fb;
+  margin: 0;
+  color: #333;
+}
+
+header {
+  background: #040B80;
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+  margin-left: 15px;
+  font-weight: bold;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+main {
+  max-width: 800px;
+  margin: 40px auto;
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+
+h2 {
+  color: #040B80;
+  margin-top: 0;
+}
+
+.section {
+  margin-bottom: 25px;
+}
+
+.section p {
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.highlight {
+  background: #eaf4fb;
+  padding: 15px;
+  border-left: 5px solid #00B8E9;
+  border-radius: 6px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>Allied Health Scientific</h1>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="about.html">About Us</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+</header>
+
+<main>
+  <h2>About Allied Health Scientific</h2>
+
+  <div class="section">
+    <p>
+      Allied Health Scientific is a national distributor of hospital,
+      pharmaceutical, and ambulatory care supplies in the healthcare
+      industry of Belize.
+    </p>
+  </div>
+
+  <div class="section highlight">
+    <p><strong>Wholesale & Supply Store</strong></p>
+    <p>
+      We provide reliable, high-quality medical and healthcare products
+      to clinics, hospitals, pharmacies, and healthcare professionals
+      across the country.
+    </p>
+  </div>
+
+  <div class="section">
+    <p><strong>Location</strong></p>
+    <p>
+      #15 Valencia Street<br>
+      Belmopan, Belize
+    </p>
+  </div>
+</main>
+
+</body>
+</html>
