@@ -27,7 +27,6 @@ const sheetURL = "https://docs.google.com/spreadsheets/d/1gDRKAFFNtFlox6OyG8fr6y
 let products = [];
 let cart = JSON.parse(localStorage.getItem("site_cart_v1") || "[]");
 
-// Load products
 async function loadProducts() {
   const res = await fetch(sheetURL);
   const text = await res.text();
@@ -48,7 +47,6 @@ async function loadProducts() {
   updateCartCount();
 }
 
-// Display products
 function displayProducts(list) {
   const container = document.getElementById("product-list");
   container.innerHTML = list.map(p => `
@@ -63,7 +61,6 @@ function displayProducts(list) {
   `).join("");
 }
 
-// Add to cart
 function addToCart(id) {
   const p = products.find(x=>x.id===id);
   const qtyInput = document.getElementById(`qty-${id}`);
@@ -75,17 +72,14 @@ function addToCart(id) {
   localStorage.setItem("site_cart_v1", JSON.stringify(cart));
   updateCartCount();
 
-  qtyInput.style.display = 'none';
-  qtyInput.nextElementSibling.style.display = 'none'; // hide button
+  qtyInput.value = ""; // only clear number
 }
 
-// Update cart count
 function updateCartCount() {
   const count = cart.reduce((s,i)=>s+i.qty,0);
   document.getElementById("cart-count").textContent = count;
 }
 
-// Category filter
 function populateCategoryFilter() {
   const sel = document.getElementById("category-filter");
   const cats = [...new Set(products.map(p=>p.category).filter(Boolean))];
@@ -103,7 +97,6 @@ function populateCategoryFilter() {
   });
 }
 
-// Search
 document.getElementById("search").addEventListener("input", e=>{
   const term = e.target.value.toLowerCase();
   const filtered = products.filter(p=>
