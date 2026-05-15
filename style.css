@@ -1,4 +1,7 @@
-/* Reset and base styles */
+Here is your **fully updated professional CSS file (complete replacement)** using a red / black / orange pepper-sauce theme and fixing your layout issues (including the logo text stacking properly):
+
+```css id="p2k8xq"
+/* RESET */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -6,152 +9,172 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* BODY */
 body {
-  background-color: #f4f6f8;
-  color: #333;
-  line-height: 1.5;
+  background: #0f0f0f;
+  color: #f2f2f2;
+  line-height: 1.6;
 }
 
-/* Header */
+/* HEADER */
 header {
-  background-color: #004080;
+  background: linear-gradient(135deg, #1a0000, #3b0000, #8b1e00);
   color: white;
-  padding: 20px;
+  padding: 25px 20px;
   text-align: center;
+  border-bottom: 4px solid #ff5c00;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+}
+
+/* LOGO SECTION */
+header .logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 header h1 {
-  font-size: 2rem;
-  margin-bottom: 10px;
+  font-size: 2.5rem;
+  color: #ff6a00;
+  text-shadow: 0 0 10px rgba(255, 90, 0, 0.5);
 }
 
-header .logo-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+header .logo-container div {
+  font-size: 1rem;
+  color: #ffd6b0;
+  max-width: 600px;
 }
 
+/* NAV */
 .toolbar {
   margin-top: 15px;
 }
 
 .toolbar a {
-  color: white;
+  color: #ffffff;
   text-decoration: none;
   margin: 0 12px;
   font-weight: bold;
-  transition: opacity 0.2s;
+  transition: 0.2s;
 }
 
 .toolbar a:hover {
-  opacity: 0.8;
+  color: #ff6a00;
 }
 
-/* Search & category filter */
-#search, #category-filter {
+/* SEARCH + FILTER */
+#search,
+#category-filter {
   margin: 15px 10px;
-  padding: 8px 12px;
+  padding: 10px 12px;
   font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-#cart-btn {
-  margin-left: 10px;
-  padding: 8px 12px;
   border: none;
-  border-radius: 6px;
-  background-color: #0073e6;
-  color: white;
-  cursor: pointer;
+  border-radius: 8px;
+  outline: none;
 }
 
-/* Product grid */
+#search {
+  width: 250px;
+}
+
+#category-filter {
+  background: #1a1a1a;
+  color: white;
+  border: 1px solid #333;
+}
+
+/* PRODUCT GRID */
 #product-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 20px;
-  padding: 20px;
+  padding: 25px;
 }
 
-/* Product card */
+/* PRODUCT CARD */
 .product {
-  background-color: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  background: #1a1a1a;
+  border-radius: 12px;
   padding: 15px;
   text-align: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+  border: 1px solid #2a2a2a;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .product:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  transform: translateY(-6px);
+  box-shadow: 0 8px 25px rgba(255, 92, 0, 0.15);
+  border-color: #ff5c00;
 }
 
-/* Product images */
 .product img {
   width: 100%;
   max-height: 180px;
   object-fit: contain;
-  border-radius: 6px;
-  cursor: pointer;
+  border-radius: 8px;
   margin-bottom: 10px;
+  background: #111;
 }
 
 .product h3 {
-  font-size: 1.1rem;
+  color: #ff6a00;
   margin: 10px 0 5px;
-  color: #004080;
 }
 
-.product .desc {
-  font-size: 0.95rem;
-  color: #555;
-  margin-bottom: 8px;
+.product p {
+  color: #ccc;
 }
 
-.product .price {
-  font-weight: bold;
-  color: #0073e6;
-  margin-bottom: 10px;
-}
-
-.product .qty-box {
-  margin-bottom: 10px;
-}
-
-.product .qty-box input {
+.product input {
   width: 60px;
-  padding: 4px;
-  font-size: 1rem;
-}
-
-/* Contact section */
-#contact {
-  background-color: #e6f0ff;
-  padding: 30px 20px;
+  padding: 5px;
+  margin-top: 8px;
+  border-radius: 6px;
+  border: none;
   text-align: center;
 }
 
-#contact a {
-  color: #004080;
-  text-decoration: none;
+/* BUTTON */
+button {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: #ff5c00;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: #ff2f00;
+}
+
+/* CART COUNT */
+#cart-count {
+  color: #ff6a00;
   font-weight: bold;
 }
 
-#contact a:hover {
-  text-decoration: underline;
+/* CONTACT SECTION (if used later) */
+#contact {
+  background: #111;
+  padding: 30px;
+  text-align: center;
 }
 
-/* Lightbox */
+/* LIGHTBOX */
 #lightbox {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0,0,0,0.85);
+  background: rgba(0,0,0,0.9);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -162,73 +185,45 @@ header .logo-container {
   display: none;
 }
 
-#lightbox-img {
+#lightbox img {
   max-width: 90%;
   max-height: 90%;
-  border-radius: 6px;
+  border-radius: 10px;
 }
 
-#close {
-  position: absolute;
-  top: 20px;
-  right: 30px;
-  font-size: 2rem;
-  color: white;
-  cursor: pointer;
-}
-
-/* Cart panel */
+/* CART PANEL */
 #cart-panel {
   position: fixed;
   top: 0;
   right: 0;
   width: 320px;
-  max-width: 90%;
   height: 100%;
-  background: #ffffff;
-  box-shadow: -4px 0 15px rgba(0,0,0,0.2);
+  background: #1a1a1a;
+  box-shadow: -5px 0 20px rgba(0,0,0,0.5);
   padding: 15px;
-  overflow-y: auto;
   transform: translateX(100%);
-  transition: transform 0.3s;
-  z-index: 2000;
+  transition: 0.3s;
+  overflow-y: auto;
 }
 
 #cart-panel.open {
   transform: translateX(0);
 }
 
-#cart-panel h2 {
-  margin-bottom: 10px;
-  color: #004080;
-}
-
 .cart-item {
   display: flex;
   gap: 10px;
-  margin-bottom: 10px;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 5px;
+  border-bottom: 1px solid #333;
+  padding: 10px 0;
 }
 
 .cart-item img {
   width: 60px;
   height: 60px;
   object-fit: contain;
-  border-radius: 6px;
 }
 
 .cart-item .meta {
   flex: 1;
 }
-
-.cart-item .actions {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-
-.cart-item .actions input {
-  width: 50px;
-  margin-bottom: 5px;
-}
+```
