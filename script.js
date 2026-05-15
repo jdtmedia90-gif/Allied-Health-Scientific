@@ -1,1 +1,123 @@
+const sheetURL = "https://docs.google.com/spreadsheets/d/1gDRKAFFNtFlox6OyG8fr6y5PMRahFQLy_TQzXatJtwo/gviz/tq?tqx=out:json";
 
+let products = [];
+let cart = JSON.parse(localStorage.getItem("site_cart_v1") || "[]");
+
+async function loadProducts() {
+  const res = await fetch(sheetURL);
+  const text = await res.text();
+  const jsonData = JSON.parse(text.substring(47).slice(0, -2));
+  const rows = jsonData.table.rows;
+
+  products = rows.slice(1).map((r, i) => ({
+    id: r.c[0]?.v || "p" + i,
+    name: r.c[0]?.v || "",
+    category: r.c[1]?.v || "",
+    price: parseFloat(r.c[2]?.v) || 0,
+    desc: r.c[3]?.v || "",
+    image: r.c[4]?.v || ""
+  }));
+
+  populateCategoryFilter();
+  displayProducts(products);
+  updateCartCount();
+}
+
+function displayProducts(list) {
+  const container = document.getElementById("product-list");
+
+  container.innerHTML = list.map(p => `
+    <div class="product">
+      ${p.image ? `<img src="${p.image}" alt="${p.name}">` : ""}
+
+      <h3>${p.name}</h3>
+
+      <p>${p.desc}</p>
+
+      <p>Price: $${p.price.toFixed(2)}</p>
+
+      <input type="number" min="1" value="1" id="qty-${p.id}">
+
+      <button onclick="addToCart('${p.id}')">
+        Add to Cart
+      </button>
+    </div>
+  `).join("");
+}
+
+function addToCart(id) {
+  const p = products.find(x => x.id === id);
+
+  const qtyInput = document.getElementById(`qty-${id}`);
+  const qty = Math.max(1, parseInt(qtyInput.value) || 1);
+
+  const existing = cart.find(i => i.id === id);
+
+  if (existing) {
+    existing.qty += qty;
+  } else {
+    cart.push({
+      ...p,
+      qty
+    });
+  }
+
+  localStorage.setItem("site_cart_v1", JSON.stringify(cart));
+
+  updateCartCount();
+
+  qtyInput.value = "";
+}
+
+function updateCartCount() {
+  const count = cart.reduce((s, i) => s + i.qty, 0);
+
+  document.getElementById("cart-count").textContent = count;
+}
+
+function populateCategoryFilter() {
+  const sel = document.getElementById("category-filter");
+
+  const cats = [
+    ...new Set(
+      products
+        .map(p => p.category)
+        .filter(Boolean)
+    )
+  ];
+
+  sel.innerHTML = '<option value="">All</option>';
+
+  cats.forEach(c => {
+    const opt = document.createElement("option");
+
+    opt.value = c;
+    opt.textContent = c;
+
+    sel.appendChild(opt);
+  });
+
+  sel.addEventListener("change", e => {
+    const cat = e.target.value;
+
+    const filtered = cat
+      ? products.filter(p => p.category === cat)
+      : products;
+
+    displayProducts(filtered);
+  });
+}
+
+document.getElementById("search").addEventListener("input", e => {
+  const term = e.target.value.toLowerCase();
+
+  const filtered = products.filter(p =>
+    p.name.toLowerCase().includes(term) ||
+    p.desc.toLowerCase().includes(term) ||
+    p.category.toLowerCase().includes(term)
+  );
+
+  displayProducts(filtered);
+});
+
+loadProducts();
