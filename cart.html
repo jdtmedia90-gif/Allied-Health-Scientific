@@ -3,135 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cart - Allied Health Scientific</title>
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f4f8fb;
-  margin: 0;
-  padding: 0;
-  color: #333;
-}
-header {
-  background: #040B80;
-  color: white;
-  padding: 15px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-header h1 {
-  margin: 0;
-  font-size: 24px;
-}
-header nav a {
-  color: white;
-  text-decoration: none;
-  margin-left: 15px;
-  font-weight: bold;
-}
-header nav a:hover {
-  text-decoration: underline;
-}
-main {
-  max-width: 800px;
-  margin: 30px auto;
-  background: white;
-  padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 0 15px rgba(0,0,0,0.1);
-}
-.cart-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #ddd;
-  padding: 12px 0;
-}
-.cart-item h4 {
-  margin: 0 0 5px 0;
-  font-size: 18px;
-}
-.cart-item p {
-  margin: 0;
-  font-size: 14px;
-}
-.qty-input {
-  width: 60px;
-  padding: 5px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  margin-right: 10px;
-}
-.remove-item {
-  background: #e74c3c;
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-.remove-item:hover {
-  background: #c0392b;
-}
-#cart-subtotal {
-  font-weight: bold;
-  font-size: 18px;
-}
-form {
-  margin-top: 20px;
-  display: flex;
-  flex-direction: column;
-}
-form label {
-  font-weight: bold;
-  margin-top: 10px;
-  margin-bottom: 5px;
-}
-form input, form button {
-  padding: 12px;
-  border-radius: 6px;
-  border: 2px solid #64D9E3;
-  font-size: 14px;
-}
-form input:focus {
-  outline: none;
-  border-color: #00B8E9;
-  box-shadow: 0 0 5px #00B8E9;
-}
-form button {
-  background: #00B8E9;
-  color: white;
-  border: none;
-  margin-top: 15px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: 0.2s;
-}
-form button:hover {
-  background: #040B80;
-}
-#status {
-  margin-top: 15px;
-  font-weight: bold;
-  color: #040B80;
-  text-align: center;
-}
-@media(max-width:600px){
-  .cart-item {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .qty-input {
-    margin: 10px 0;
-  }
-}
-</style>
+<title>Cart - Yosdi's Homemade Habanero Pepper Sauce</title>
+
+<link rel="stylesheet" href="style.css">
 </head>
+
 <body>
+
 <header>
-  <h1>Allied Health Scientific</h1>
+  <div class="logo-container">
+    <h1>Yosdi's Homemade Habanero Pepper Sauce</h1>
+    <div>
+      The pepper sauce of the West! 🇧🇿<br>
+      Yosdi's Homemade Habanero Pepper Sauce is here to deliver! 🥵💥🌶
+    </div>
+  </div>
+
   <nav class="toolbar">
     <a href="index.html">Home</a>
     <a href="about.html">About Us</a>
@@ -140,17 +27,28 @@ form button:hover {
 </header>
 
 <main>
+
   <p>Cart Items: <span id="cart-count">0</span></p>
+
   <div id="cart-items"></div>
+
   <p>Subtotal: $<span id="cart-subtotal">0.00</span></p>
 
   <form id="checkoutForm">
-    <label>Name</label><input type="text" id="customerName" required>
-    <label>Email</label><input type="email" id="customerEmail" required>
-    <label>Phone</label><input type="text" id="customerPhone" required>
+    <label>Name</label>
+    <input type="text" id="customerName" required>
+
+    <label>Email</label>
+    <input type="email" id="customerEmail" required>
+
+    <label>Phone</label>
+    <input type="text" id="customerPhone" required>
+
     <button type="submit">Checkout / Get Quote</button>
   </form>
+
   <p id="status"></p>
+
 </main>
 
 <script>
@@ -221,6 +119,7 @@ document.getElementById("checkoutForm").addEventListener("submit", async functio
     });
 
     const result = await response.json();
+
     if(result.success){
       status.textContent = "Order submitted successfully!";
       cart = [];
@@ -229,6 +128,7 @@ document.getElementById("checkoutForm").addEventListener("submit", async functio
     } else {
       status.textContent = "Error: " + result.message;
     }
+
   } catch(err) {
     status.textContent = "Error submitting order.";
   }
@@ -236,5 +136,6 @@ document.getElementById("checkoutForm").addEventListener("submit", async functio
 
 updateCart();
 </script>
+
 </body>
 </html>
