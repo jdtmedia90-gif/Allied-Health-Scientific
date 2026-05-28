@@ -8,17 +8,6 @@
 <link rel="stylesheet" href="style.css">
 
 <style>
-  .logo-container {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-  }
-
-  .logo-container img {
-    width: 60px;
-    height: auto;
-  }
-
   .banner {
     width: 100%;
     display: block;
@@ -44,6 +33,29 @@
     width: 250px;
     padding: 8px;
   }
+
+  /* HEADER FIX (THIS IS THE IMPORTANT PART) */
+  header {
+    text-align: center;
+  }
+
+  /* LOGO FIXED SIZE - NO FLEX SHRINK ISSUES */
+  .logo-container {
+    display: block;
+    text-align: center;
+  }
+
+  .logo-container img {
+    width: 320px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+
+  /* TEXT BELOW LOGO */
+  .logo-text {
+    margin-top: 10px;
+  }
 </style>
 
 </head>
@@ -52,15 +64,17 @@
 
 <header>
 
+  <!-- LOGO -->
   <div class="logo-container">
     <img src="logo.png" alt="Logo">
+  </div>
 
+  <!-- TEXT (NO FLEX, NO COMPRESSION) -->
+  <div class="logo-text">
+    <h1>Yosdi's Homemade Habanero Pepper Sauce</h1>
     <div>
-      <h1>Yosdi's Homemade Habanero Pepper Sauce</h1>
-      <div>
-        The pepper sauce of the West! 🇧🇿<br>
-        Yosdi's Homemade Habanero Pepper Sauce is here to deliver! 🥵💥🌶
-      </div>
+      The pepper sauce of the West! 🇧🇿<br>
+      Yosdi's Homemade Habanero Pepper Sauce is here to deliver! 🥵💥🌶
     </div>
   </div>
 
@@ -77,36 +91,37 @@
 <!-- BANNER -->
 <img src="banner.png" class="banner" alt="Banner">
 
-<!-- SHOP NOW TEXT -->
+<!-- SHOP NOW -->
 <div class="shop-now">Shop Now</div>
 
 <!-- FILTERS -->
 <div class="filters">
   <input type="text" id="search" placeholder="Search products...">
-
   <select id="category-filter">
     <option value="">All</option>
   </select>
 </div>
 
 <main>
+
   <div id="product-list"></div>
 
-  <!-- REVIEWS SECTION -->
+  <!-- REVIEWS -->
   <section class="reviews-section">
     <h2>Customer Reviews</h2>
 
- <div class="reviews-grid">
-  <img src="r1.png" alt="Review 1">
-  <img src="r2.png" alt="Review 2">
-  <img src="r3.png" alt="Review 3">
-  <img src="r4.png" alt="Review 4">
-  <img src="r5.png" alt="Review 5">
-  <img src="r6.png" alt="Review 6">
-  <img src="r7.png" alt="Review 7">
-  <img src="r8.png" alt="Review 8">
-</div>
-</section>
+    <div class="reviews-grid">
+      <img src="r1.png" alt="Review 1">
+      <img src="r2.png" alt="Review 2">
+      <img src="r3.png" alt="Review 3">
+      <img src="r4.png" alt="Review 4">
+      <img src="r5.png" alt="Review 5">
+      <img src="r6.png" alt="Review 6">
+      <img src="r7.png" alt="Review 7">
+      <img src="r8.png" alt="Review 8">
+    </div>
+
+  </section>
 
 </main>
 
