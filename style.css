@@ -43,27 +43,29 @@ header {
   padding: 28px 20px;
 }
 
-/* LOGO ROW */
+/* LOGO CONTAINER */
 .logo-container {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 32px;
+  flex-wrap: wrap;
 }
 
-/* 🔥 FIXED LOGO SIZE (NO SHRINKING) */
+/* 🔥 FIXED LOGO (NO SHRINKING, NO OVERRIDES) */
 .logo-container img {
   width: 420px;
   height: auto;
-  flex-shrink: 0;
   display: block;
+  flex-shrink: 0;
 }
 
-/* TEXT */
+/* TEXT BLOCK */
 .logo-container div {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  max-width: 600px;
 }
 
 /* TITLE */
@@ -128,9 +130,12 @@ header {
   font-weight: 900;
   margin: 30px 0 20px;
   color: #ffffff;
+  text-shadow:
+    0 0 25px rgba(255,90,26,0.5),
+    0 0 60px rgba(255,43,26,0.3);
 }
 
-/* PRODUCTS */
+/* PRODUCT GRID */
 #product-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -138,17 +143,20 @@ header {
   padding: 20px 28px 50px;
 }
 
+/* PRODUCT */
 .product {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
+
   display: flex;
   flex-direction: column;
   padding: 22px;
   gap: 12px;
 }
 
+/* PRODUCT IMAGE */
 .product img {
   width: 100%;
   height: 270px;
@@ -228,9 +236,10 @@ button:hover {
 .reviews-section h2 {
   font-size: 2.5rem;
   margin-bottom: 25px;
+  color: #fff;
 }
 
-/* REVIEWS GRID (LARGER) */
+/* REVIEWS GRID */
 .reviews-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
@@ -258,7 +267,7 @@ button:hover {
   }
 
   .logo-container img {
-    width: 220px;
+    width: 240px;
   }
 
   .shop-now {
