@@ -321,3 +321,9 @@ button:hover {
 
   border-radius: 14px;
 }
+
+.logo-container img {
+  width: 320px !important;
+  height: auto !important;
+  max-width: none !important;
+}
