@@ -243,7 +243,7 @@ input {
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-/* ZOOM (UNCHANGED) */
+/* ZOOM */
 .reviews-grid img:hover {
   transform: scale(1.60);
   box-shadow: 0 45px 110px rgba(0,0,0,0.95);
