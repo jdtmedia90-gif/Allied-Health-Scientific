@@ -50,20 +50,23 @@ header {
   padding: 28px 20px;
 }
 
-/* LOGO */
+/* LOGO LAYOUT (FIXED ALIGNMENT) */
 .logo-container {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  text-align: center;
-
-  gap: 8px;
+  gap: 24px;
 }
 
-.logo-container h1 {
+/* BIGGER LOGO */
+.logo-container img {
+  width: 130px;
+  height: auto;
+}
+
+/* TEXT BLOCK */
+.logo-container div h1 {
   font-size: 2.6rem;
   font-weight: 800;
-
   color: #ffffff;
 
   text-shadow:
@@ -71,8 +74,9 @@ header {
     0 0 40px rgba(255,43,26,0.2);
 }
 
-.logo-container div {
+.logo-container div div {
   color: var(--muted);
+  margin-top: 6px;
 }
 
 /* NAV */
@@ -99,44 +103,49 @@ header {
   color: var(--hot);
 }
 
-/* CONTROLS */
-.controls {
+/* FILTERS */
+.filters {
   display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
 
-  gap: 14px;
+  gap: 10px;
 
-  padding: 24px 20px;
+  margin: 12px 0 20px 0;
 }
 
-#search,
-#category-filter {
-  background: var(--surface);
+.filters input,
+.filters select {
+  width: 260px;
+
+  padding: 10px;
+
+  border-radius: 10px;
 
   border: 1px solid var(--border);
 
+  background: var(--surface);
+
   color: white;
-
-  padding: 12px 14px;
-
-  border-radius: 12px;
 }
 
-#search {
-  width: 320px;
+/* SHOP NOW (FIXED BIG PROMINENT STYLE) */
+.shop-now {
+  text-align: center;
+
+  font-size: 56px;
+  font-weight: 900;
+
+  margin: 30px 0 20px 0;
+
+  color: #ffffff;
+
+  text-shadow:
+    0 0 25px rgba(255,90,26,0.5),
+    0 0 60px rgba(255,43,26,0.3);
 }
 
-#search:focus,
-#category-filter:focus {
-  outline: none;
-
-  border-color: var(--ember);
-
-  box-shadow: 0 0 0 4px rgba(255,90,26,0.15);
-}
-
-/* GRID */
+/* PRODUCT GRID */
 #product-list {
   display: grid;
 
@@ -165,29 +174,18 @@ header {
   padding: 22px;
 
   gap: 12px;
-
-  transition: var(--transition);
 }
 
-.product:hover {
-  transform: translateY(-6px);
-
-  border-color: rgba(255,90,26,0.35);
-}
-
-/* IMAGE (FIXED - NO CROPPING) */
+/* IMAGE */
 .product img {
   width: 100%;
-
   height: 270px;
 
-  object-fit: contain;   /* IMPORTANT FIX */
+  object-fit: contain;
 
   background: #0c0c0f;
 
   border-radius: 12px;
-
-  margin: 0;
 }
 
 /* TEXT */
@@ -214,8 +212,6 @@ header {
   gap: 12px;
 
   margin-top: auto;
-
-  padding-top: 8px;
 }
 
 /* INPUT */
@@ -250,8 +246,6 @@ button {
   font-weight: 700;
 
   cursor: pointer;
-
-  transition: var(--transition);
 }
 
 button:hover {
@@ -259,7 +253,7 @@ button:hover {
   transform: translateY(-2px);
 }
 
-/* CART COUNT */
+/* CART */
 #cart-count {
   color: var(--ember);
   font-weight: 700;
