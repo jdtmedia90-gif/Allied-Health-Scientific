@@ -33,26 +33,31 @@ body {
   line-height: 1.6;
 }
 
+/* HEADER */
 header {
   background: linear-gradient(135deg, #0a0a0d, #120606, #1a0a05);
   border-bottom: 1px solid rgba(255,90,26,0.25);
   padding: 28px 20px;
 }
 
+/* LOGO AREA */
 .logo-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 32px;
+  gap: 28px;
   flex-wrap: wrap;
+  text-align: center;
 }
 
+/* LOGO (responsive instead of fixed size) */
 .logo-container img {
-  width: 420px;
+  width: clamp(160px, 28vw, 420px);
   height: auto;
   flex-shrink: 0;
 }
 
+/* TEXT */
 .logo-container div {
   display: flex;
   flex-direction: column;
@@ -61,7 +66,7 @@ header {
 }
 
 .logo-container h1 {
-  font-size: 2.8rem;
+  font-size: clamp(1.6rem, 3vw, 2.8rem);
   font-weight: 800;
   margin: 0;
   color: #ffffff;
@@ -75,6 +80,7 @@ header {
   color: var(--muted);
 }
 
+/* NAV */
 .toolbar {
   display: flex;
   justify-content: center;
@@ -93,6 +99,7 @@ header {
   color: var(--hot);
 }
 
+/* FILTERS */
 .filters {
   display: flex;
   flex-direction: column;
@@ -103,7 +110,7 @@ header {
 
 .filters input,
 .filters select {
-  width: 260px;
+  width: min(260px, 90%);
   padding: 10px;
   border-radius: 10px;
   border: 1px solid var(--border);
@@ -111,15 +118,18 @@ header {
   color: white;
 }
 
-/* BANNER RESTORED (NO RESTRICTIONS) */
+/* BANNER */
 .banner {
   width: 100%;
   display: block;
+  max-height: 420px;
+  object-fit: cover;
 }
 
+/* SHOP TITLE */
 .shop-now {
   text-align: center;
-  font-size: 56px;
+  font-size: clamp(28px, 5vw, 56px);
   font-weight: 900;
   margin: 30px 0 20px;
   color: #ffffff;
@@ -128,13 +138,15 @@ header {
     0 0 60px rgba(255,43,26,0.3);
 }
 
+/* PRODUCT GRID */
 #product-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 26px;
   padding: 20px 28px 50px;
 }
 
+/* PRODUCT */
 .product {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -155,6 +167,7 @@ header {
   border-radius: 12px;
 }
 
+/* BUTTON */
 button {
   background: linear-gradient(135deg, var(--ember), var(--fire));
   border: none;
@@ -170,11 +183,13 @@ button:hover {
   box-shadow: 0 0 18px rgba(255,90,26,0.35);
 }
 
+/* CART */
 #cart-count {
   color: var(--ember);
   font-weight: 700;
 }
 
+/* CART PANEL */
 #cart-panel {
   position: fixed;
   top: 0;
@@ -193,6 +208,7 @@ button:hover {
   transform: translateX(0);
 }
 
+/* LIGHTBOX */
 #lightbox {
   position: fixed;
   inset: 0;
@@ -212,6 +228,7 @@ button:hover {
   border-radius: 14px;
 }
 
+/* REVIEWS */
 .reviews-section {
   padding: 60px 20px;
   text-align: center;
@@ -219,25 +236,47 @@ button:hover {
 }
 
 .reviews-section h2 {
-  font-size: 2.5rem;
+  font-size: clamp(1.6rem, 3vw, 2.5rem);
   margin-bottom: 25px;
   color: #fff;
 }
 
+/* REVIEWS GRID (FIXED RESPONSIVE) */
 .reviews-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
   max-width: 1400px;
   margin: 0 auto;
 }
 
 .reviews-grid img {
   width: 100%;
-  max-height: 450px;
+  height: auto;
   object-fit: contain;
-  padding: 12px;
+  padding: 10px;
   border-radius: 14px;
   background: #0c0c0f;
   border: 1px solid var(--border);
+}
+
+/* MOBILE ADJUSTMENTS */
+@media (max-width: 768px) {
+
+  .logo-container {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .banner {
+    max-height: 260px;
+  }
+
+  #product-list {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+
+  .reviews-grid {
+    grid-template-columns: 1fr;
+  }
 }
