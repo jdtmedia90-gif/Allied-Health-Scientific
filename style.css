@@ -36,23 +36,21 @@ body {
   line-height: 1.6;
 }
 
-/* ========================= */
-/* HEADER (MOBILE FIRST FIX) */
-/* ========================= */
-
+/* HEADER */
 header {
-  background:
-    linear-gradient(135deg, #0a0a0d, #120606, #1a0a05);
+  background: linear-gradient(135deg, #0a0a0d, #120606, #1a0a05);
   border-bottom: 1px solid rgba(255,90,26,0.25);
-  padding: 20px 12px;
+  padding: 28px 20px;
 }
 
+/* LOGO CONTAINER */
 .logo-container {
   display: flex;
-  flex-direction: column; /* MOBILE FIRST */
+  flex-direction: column;
   align-items: center;
   text-align: center;
   gap: 12px;
+  width: 100%;
 }
 
 .logo-container img {
@@ -128,19 +126,17 @@ header {
   font-size: 32px;
   font-weight: 900;
   margin: 25px 0 15px;
+
   color: #fff;
   text-shadow:
     0 0 25px rgba(255,90,26,0.5),
     0 0 60px rgba(255,43,26,0.3);
 }
 
-/* ========================= */
-/* PRODUCT GRID (SAFE BASE) */
-/* ========================= */
-
+/* PRODUCTS */
 #product-list {
   display: grid;
-  grid-template-columns: 1fr; /* MOBILE DEFAULT */
+  grid-template-columns: 1fr;
   gap: 18px;
   padding: 15px;
 }
@@ -172,8 +168,8 @@ header {
 
 .product-actions {
   display: flex;
-  gap: 10px;
   align-items: center;
+  gap: 10px;
   margin-top: auto;
 }
 
@@ -250,10 +246,7 @@ button:hover {
   border-radius: 14px;
 }
 
-/* ========================= */
-/* REVIEWS (FIXED PROPERLY) */
-/* ========================= */
-
+/* REVIEWS */
 .reviews-section {
   padding: 50px 15px;
   text-align: center;
@@ -270,7 +263,6 @@ button:hover {
     0 0 50px rgba(255,43,26,0.2);
 }
 
-/* MOBILE-FIRST GRID */
 .reviews-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -285,32 +277,33 @@ button:hover {
   object-fit: contain;
 
   padding: 12px;
-
   border-radius: 14px;
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
   background: #0c0c0f;
-
-  transition: 0.2s ease;
 }
 
-.reviews-grid img:hover {
-  transform: scale(1.02);
-}
-
-/* ========================= */
-/* DESKTOP UPGRADE */
-/* ========================= */
-
+/* DESKTOP */
 @media (min-width: 768px) {
 
   .logo-container {
     flex-direction: row;
+    justify-content: center;
     text-align: left;
+    gap: 32px;
   }
 
   .logo-container img {
-    width: 280px;
+    width: 340px;
+  }
+
+  .logo-container div {
+    align-items: flex-start;
+    max-width: 600px;
+  }
+
+  .logo-container h1 {
+    font-size: 2.8rem;
   }
 
   .shop-now {
@@ -319,7 +312,6 @@ button:hover {
 
   #product-list {
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    padding: 20px 28px;
   }
 
   .reviews-grid {
