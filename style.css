@@ -42,7 +42,7 @@ header {
   padding: 28px 20px;
 }
 
-/* 🔥 FIXED: TRUE CENTER GROUP */
+/* LOGO CONTAINER */
 .logo-container {
   display: flex;
   align-items: center;
@@ -54,27 +54,23 @@ header {
   text-align: center;
 }
 
-/* LOGO */
 .logo-container img {
   width: clamp(220px, 34vw, 460px);
   height: auto;
   display: block;
 }
 
-/* TEXT BLOCK */
 .logo-container div {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-
   margin: 0;
   padding: 0;
   max-width: none;
 }
 
-/* TITLE */
 .logo-container h1 {
   font-size: clamp(1.6rem, 3vw, 2.8rem);
   font-weight: 800;
@@ -88,7 +84,6 @@ header {
     0 0 40px rgba(255,43,26,0.2);
 }
 
-/* SUBTEXT */
 .logo-container div div {
   margin-top: 2px;
   color: var(--muted);
@@ -123,8 +118,27 @@ header {
   text-align: center;
   font-size: 56px;
   font-weight: 900;
-  margin: 30px 0 20px;
+  margin: 30px 0 10px;
   color: #ffffff;
+}
+
+/* ✅ SEARCH + FILTER CENTER FIX (UNDER SHOP NOW) */
+.filters {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  margin: 10px 0 30px;
+  gap: 12px;
+}
+
+.filters input,
+.filters select {
+  width: 320px;
+  max-width: 90%;
+  text-align: center;
 }
 
 /* PRODUCTS */
@@ -166,7 +180,7 @@ button {
   cursor: pointer;
 }
 
-/* SECTION BASE (ABOUT + CONTACT) */
+/* SECTION */
 .section,
 .section.highlight {
   background: var(--surface);
@@ -196,15 +210,6 @@ button {
   border-radius: var(--radius);
   padding: 18px;
   box-shadow: var(--shadow);
-}
-
-.cart-item h4 {
-  font-size: 1.3rem;
-  margin-bottom: 6px;
-}
-
-.cart-item p {
-  color: var(--muted);
 }
 
 /* INPUTS */
@@ -256,17 +261,16 @@ input {
     font-size: 16px;
   }
 
-  .logo-container {
-    flex-direction: column;
-    gap: 10px;
-    flex-wrap: wrap;
+  .shop-now {
+    font-size: 38px;
   }
 
   .reviews-grid img:hover {
     transform: scale(1.2);
   }
 
-  .shop-now {
-    font-size: 38px;
+  .logo-container {
+    flex-direction: column;
+    gap: 10px;
   }
 }
