@@ -389,3 +389,67 @@ button:hover {
     0 0 30px rgba(255,90,26,0.4),
     0 30px 80px rgba(0,0,0,0.9);
 }
+
+
+/* MOBILE RESPONSIVENESS */
+
+
+@media (max-width: 768px) {
+
+  /* LOGO STACK */
+  .logo-container {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+
+  .logo-container img {
+    width: 180px !important;
+  }
+
+  /* TITLE */
+  .logo-container h1 {
+    font-size: 1.8rem;
+  }
+
+  /* SHOP TITLE */
+  .shop-now {
+    font-size: 34px;
+  }
+
+  /* PRODUCTS */
+  #product-list {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    padding: 15px;
+  }
+
+  /* REVIEWS (IMPORTANT FIX) */
+  .reviews-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .reviews-grid img {
+    max-height: 300px;
+  }
+
+  /* FILTER INPUTS */
+  .filters input,
+  .filters select {
+    width: 90%;
+  }
+}
+
+@media (max-width: 480px) {
+
+  .shop-now {
+    font-size: 28px;
+  }
+
+  .logo-container img {
+    width: 140px !important;
+  }
+
+  button {
+    width: 100%;
+  }
+}
