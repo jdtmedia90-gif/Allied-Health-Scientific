@@ -40,7 +40,7 @@ header {
   padding: 28px 20px;
 }
 
-/* LOGO */
+/* LOGO CONTAINER */
 .logo-container {
   display: flex;
   align-items: center;
@@ -53,9 +53,9 @@ header {
 .logo-container img {
   width: clamp(180px, 30vw, 420px);
   height: auto;
+  flex-shrink: 0;
 }
 
-/* TEXT */
 .logo-container div {
   display: flex;
   flex-direction: column;
@@ -66,16 +66,20 @@ header {
 .logo-container h1 {
   font-size: clamp(1.6rem, 3vw, 2.8rem);
   font-weight: 800;
-  color: #fff;
+  margin: 0;
+  color: #ffffff;
+  text-shadow:
+    0 0 18px rgba(255,90,26,0.4),
+    0 0 40px rgba(255,43,26,0.2);
 }
 
-/* NAV (RESTORED CENTER) */
+/* NAV */
 .toolbar {
   display: flex;
   justify-content: center;
-  gap: 25px;
-  margin-top: 18px;
   flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 18px;
 }
 
 .toolbar a {
@@ -88,31 +92,53 @@ header {
   color: var(--hot);
 }
 
-/* BANNER (UNCHANGED SAFE) */
+/* FILTERS */
+.filters {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0 20px 0;
+}
+
+.filters input,
+.filters select {
+  width: 260px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: white;
+}
+
+/* BANNER */
 .banner {
   width: 100%;
   height: auto;
   display: block;
 }
 
-/* SHOP TITLE */
+/* SHOP NOW */
 .shop-now {
   text-align: center;
-  font-size: clamp(28px, 5vw, 56px);
+  font-size: 56px;
   font-weight: 900;
-  margin: 30px 0 20px;
-  color: #fff;
+  margin: 30px 0 20px 0;
+  color: #ffffff;
+  text-shadow:
+    0 0 25px rgba(255,90,26,0.5),
+    0 0 60px rgba(255,43,26,0.3);
 }
 
-/* PRODUCT GRID (UNCHANGED STRUCTURE) */
+/* PRODUCT GRID */
 #product-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 26px;
   padding: 20px 28px 50px;
 }
 
-/* PRODUCT CARD (RESTORED ORIGINAL FEEL) */
+/* PRODUCT */
 .product {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -125,7 +151,6 @@ header {
   gap: 12px;
 }
 
-/* PRODUCT IMAGE (RESTORED IMPORTANT BEHAVIOR) */
 .product img {
   width: 100%;
   height: 270px;
@@ -195,7 +220,7 @@ button:hover {
   border-radius: 14px;
 }
 
-/* REVIEWS (UNCHANGED CLEAN VERSION) */
+/* REVIEWS SECTION */
 .reviews-section {
   padding: 60px 20px;
   text-align: center;
@@ -208,6 +233,7 @@ button:hover {
   color: #fff;
 }
 
+/* REVIEWS GRID */
 .reviews-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -216,6 +242,7 @@ button:hover {
   margin: 0 auto;
 }
 
+/* REVIEWS IMAGE */
 .reviews-grid img {
   width: 100%;
   height: auto;
@@ -225,11 +252,15 @@ button:hover {
   background: #0c0c0f;
   border: 1px solid var(--border);
 
-  transition: transform 0.2s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transform-origin: center;
 }
 
+/* 🔥 FIXED STRONGER ZOOM (SAFE) */
 .reviews-grid img:hover {
-  transform: scale(1.05);
+  transform: scale(1.15);
+  box-shadow: 0 30px 70px rgba(0,0,0,0.85);
+  z-index: 5;
 }
 
 /* MOBILE */
@@ -242,5 +273,9 @@ button:hover {
 
   .reviews-grid {
     grid-template-columns: 1fr;
+  }
+
+  .reviews-grid img:hover {
+    transform: scale(1.08);
   }
 }
