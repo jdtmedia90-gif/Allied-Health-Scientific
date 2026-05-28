@@ -8,12 +8,12 @@
 /* ROOT */
 :root {
   --bg: #050507;
-  --surface: #0f0f14;
+  --surface: #111116;
   --surface-2: #16161d;
 
-  --flame: #ff3b1a;
-  --ember: #ff6a1a;
-  --fire: #ff1f1f;
+  --ember: #ff5a1a;
+  --fire: #ff2b1a;
+  --hot: #ff7a1a;
 
   --text: #f5f5f5;
   --muted: #b8b8b8;
@@ -23,13 +23,14 @@
   --shadow: 0 12px 30px rgba(0,0,0,0.7);
 
   --radius: 16px;
+  --transition: 0.25s ease;
 }
 
 /* BODY */
 body {
   background:
-    radial-gradient(circle at 20% 15%, rgba(255,59,26,0.22), transparent 45%),
-    radial-gradient(circle at 80% 0%, rgba(255,31,31,0.18), transparent 50%),
+    radial-gradient(circle at 20% 15%, rgba(255,90,26,0.22), transparent 45%),
+    radial-gradient(circle at 80% 0%, rgba(255,43,26,0.18), transparent 50%),
     var(--bg);
 
   color: var(--text);
@@ -44,7 +45,7 @@ header {
   background:
     linear-gradient(135deg, #0a0a0d, #120606, #1a0a05);
 
-  border-bottom: 1px solid rgba(255,59,26,0.25);
+  border-bottom: 1px solid rgba(255,90,26,0.25);
 
   padding: 28px 20px;
 }
@@ -59,13 +60,43 @@ header {
   gap: 8px;
 }
 
+.logo-container h1 {
+  font-size: 2.6rem;
+  font-weight: 800;
+
+  color: #ffffff;
+
+  text-shadow:
+    0 0 18px rgba(255,90,26,0.4),
+    0 0 40px rgba(255,43,26,0.2);
+}
+
+.logo-container div {
+  color: var(--muted);
+}
+
 /* NAV */
 .toolbar {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
+
   gap: 20px;
+
   margin-top: 18px;
+}
+
+.toolbar a {
+  color: var(--muted);
+  text-decoration: none;
+
+  font-weight: 600;
+
+  transition: var(--transition);
+}
+
+.toolbar a:hover {
+  color: var(--hot);
 }
 
 /* CONTROLS */
@@ -73,25 +104,44 @@ header {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
+
   gap: 14px;
+
   padding: 24px 20px;
 }
 
-/* INPUTS */
 #search,
 #category-filter {
   background: var(--surface);
+
   border: 1px solid var(--border);
+
   color: white;
 
   padding: 12px 14px;
+
   border-radius: 12px;
+}
+
+#search {
+  width: 320px;
+}
+
+#search:focus,
+#category-filter:focus {
+  outline: none;
+
+  border-color: var(--ember);
+
+  box-shadow: 0 0 0 4px rgba(255,90,26,0.15);
 }
 
 /* GRID */
 #product-list {
   display: grid;
+
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+
   gap: 26px;
 
   padding: 20px 28px 50px;
@@ -100,72 +150,78 @@ header {
 /* PRODUCT CARD */
 .product {
   background: var(--surface);
+
   border: 1px solid var(--border);
+
   border-radius: var(--radius);
 
   overflow: hidden;
 
   box-shadow: var(--shadow);
 
-  transition: 0.25s ease;
+  display: flex;
+  flex-direction: column;
+
+  padding: 22px;
+
+  gap: 12px;
+
+  transition: var(--transition);
 }
 
 .product:hover {
   transform: translateY(-6px);
-  border-color: rgba(255,59,26,0.35);
+
+  border-color: rgba(255,90,26,0.35);
 }
 
 /* IMAGE */
 .product img {
   width: 100%;
   height: 270px;
+
   object-fit: cover;
-  background: #000;
+
+  border-radius: 12px;
+
+  margin: 0;
 }
 
-/* CONTENT (FIXED SPACING) */
-.product-content {
-  padding: 24px;   /* FIX: more breathing room */
-}
-
-/* TITLE */
+/* TEXT */
 .product h3 {
-  color: white;
-  font-size: 1.1rem;
-  margin-bottom: 8px;
+  margin: 0;
 }
 
-/* DESCRIPTION */
 .product p {
+  margin: 0;
   color: var(--muted);
-  margin-bottom: 14px;
 }
 
-/* PRICE */
 .price {
+  margin: 0;
   color: var(--ember);
   font-weight: 700;
-  margin-bottom: 16px;
 }
 
-/* ACTIONS (FIXED ALIGNMENT) */
+/* ACTIONS */
 .product-actions {
   display: flex;
   align-items: center;
   gap: 12px;
 
-  margin-top: 10px;
+  margin-top: auto;
 
-  padding-left: 4px; /* FIX: prevents left sticking */
+  padding-top: 8px;
 }
 
-/* INPUT (FIXED INTERNAL SPACING) */
+/* INPUT */
 .product input {
   width: 70px;
 
-  padding: 10px 12px;  /* FIX: internal spacing */
+  padding: 10px 12px;
 
   border-radius: 10px;
+
   border: 1px solid var(--border);
 
   background: #0c0c0f;
@@ -180,18 +236,23 @@ button {
   background: linear-gradient(135deg, var(--ember), var(--fire));
 
   border: none;
+
   color: white;
 
   padding: 11px 16px;
+
   border-radius: 12px;
 
   font-weight: 700;
 
   cursor: pointer;
+
+  transition: var(--transition);
 }
 
 button:hover {
-  box-shadow: 0 0 18px rgba(255,59,26,0.35);
+  box-shadow: 0 0 18px rgba(255,90,26,0.35);
+  transform: translateY(-2px);
 }
 
 /* CART COUNT */
@@ -218,6 +279,7 @@ button:hover {
   overflow-y: auto;
 
   transform: translateX(100%);
+
   transition: 0.3s ease;
 }
 
