@@ -49,7 +49,8 @@ header {
   padding: 28px 20px;
 }
 
-/* LOGO CONTAINER (FIXED CENTER ALIGNMENT) */
+
+
 .logo-container {
   display: flex;
 
@@ -57,14 +58,14 @@ header {
 
   justify-content: center; /* KEY FIX */
 
-  gap: 28px;
+  gap: 32px;
 
   width: 100%;
 }
 
-/* LOGO (BIGGER) */
+
 .logo-container img {
-  width: 220px; /* FINAL SIZE FIX */
+  width: 320px; /* FINAL SIZE FIX */
   height: auto;
 
   flex-shrink: 0;
