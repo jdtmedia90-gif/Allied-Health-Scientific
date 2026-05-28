@@ -1,11 +1,9 @@
-/* RESET */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* ROOT */
 :root {
   --bg: #050507;
   --surface: #111116;
@@ -24,7 +22,6 @@
   --radius: 16px;
 }
 
-/* BODY */
 body {
   background:
     radial-gradient(circle at 20% 15%, rgba(255,90,26,0.22), transparent 45%),
@@ -43,21 +40,22 @@ header {
   padding: 28px 20px;
 }
 
-/* LOGO CONTAINER */
+/* LOGO + TEXT ROW */
 .logo-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 32px;
-  flex-wrap: wrap;
+  gap: 30px;
+  flex-wrap: nowrap; /* IMPORTANT: keeps side-by-side on desktop */
 }
 
-/* 🔥 FIXED LOGO (NO SHRINKING, NO OVERRIDES) */
+/* LOGO (NO SHRINK, FULL CONTROL) */
 .logo-container img {
   width: 420px;
+  max-width: 420px;
   height: auto;
-  display: block;
   flex-shrink: 0;
+  display: block;
 }
 
 /* TEXT BLOCK */
@@ -65,7 +63,7 @@ header {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  max-width: 600px;
+  max-width: 650px;
 }
 
 /* TITLE */
@@ -123,7 +121,7 @@ header {
   color: white;
 }
 
-/* SHOP NOW */
+/* SHOP TITLE */
 .shop-now {
   text-align: center;
   font-size: 56px;
@@ -135,7 +133,7 @@ header {
     0 0 60px rgba(255,43,26,0.3);
 }
 
-/* PRODUCT GRID */
+/* PRODUCTS */
 #product-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -143,7 +141,6 @@ header {
   padding: 20px 28px 50px;
 }
 
-/* PRODUCT */
 .product {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -156,7 +153,6 @@ header {
   gap: 12px;
 }
 
-/* PRODUCT IMAGE */
 .product img {
   width: 100%;
   height: 270px;
@@ -239,10 +235,10 @@ button:hover {
   color: #fff;
 }
 
-/* REVIEWS GRID */
+/* REVIEWS GRID (FIXED SIZE ISSUE) */
 .reviews-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
   gap: 24px;
   max-width: 1400px;
   margin: 0 auto;
@@ -250,7 +246,7 @@ button:hover {
 
 .reviews-grid img {
   width: 100%;
-  max-height: 450px;
+  max-height: 420px;
   object-fit: contain;
   padding: 12px;
   border-radius: 14px;
@@ -264,10 +260,12 @@ button:hover {
   .logo-container {
     flex-direction: column;
     text-align: center;
+    flex-wrap: wrap;
   }
 
   .logo-container img {
-    width: 240px;
+    width: 260px;
+    max-width: 260px;
   }
 
   .shop-now {
