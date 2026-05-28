@@ -40,32 +40,36 @@ header {
   padding: 28px 20px;
 }
 
-/* CENTER FIX — STRONGER GROUPING */
+/* 🔥 FIXED: TRUE CENTER GROUP */
 .logo-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px; /* tighter than before */
-  flex-wrap: wrap;
-  text-align: center;
+  gap: 8px;              /* tighter than before */
+  flex-wrap: nowrap;     /* prevents drifting apart */
   width: 100%;
+  margin: 0 auto;
+  text-align: center;
 }
 
 /* LOGO */
 .logo-container img {
-  width: clamp(200px, 32vw, 460px);
+  width: clamp(220px, 34vw, 460px);
   height: auto;
-  flex-shrink: 0;
+  display: block;
 }
 
-/* TEXT BLOCK */
+/* TEXT BLOCK — FIXED SPACING */
 .logo-container div {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  max-width: 650px;
+
+  max-width: none;   /* IMPORTANT: removes spacing push */
+  margin: 0;
+  padding: 0;
 }
 
 /* TITLE */
@@ -73,8 +77,10 @@ header {
   font-size: clamp(1.6rem, 3vw, 2.8rem);
   font-weight: 800;
   margin: 0;
+  padding: 0;
   color: #ffffff;
   text-align: center;
+  line-height: 1.1; /* tighter vertical spacing */
   text-shadow:
     0 0 18px rgba(255,90,26,0.4),
     0 0 40px rgba(255,43,26,0.2);
@@ -82,6 +88,7 @@ header {
 
 /* SUBTEXT */
 .logo-container div div {
+  margin-top: 2px; /* tightened */
   text-align: center;
   color: var(--muted);
 }
@@ -193,7 +200,7 @@ button {
   transform-origin: center;
 }
 
-/* 🔥 STRONGER ZOOM (DOUBLED FEEL) */
+/* ZOOM (UNCHANGED FROM YOUR LAST REQUEST) */
 .reviews-grid img:hover {
   transform: scale(1.60);
   box-shadow: 0 45px 110px rgba(0,0,0,0.95);
@@ -206,6 +213,7 @@ button {
   .logo-container {
     flex-direction: column;
     gap: 10px;
+    flex-wrap: wrap;
   }
 
   .reviews-grid {
