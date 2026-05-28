@@ -30,6 +30,20 @@
     font-weight: bold;
     margin: 15px 0;
   }
+
+  .filters {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    margin: 10px 0 20px 0;
+  }
+
+  .filters input,
+  .filters select {
+    width: 250px;
+    padding: 8px;
+  }
 </style>
 
 </head>
@@ -58,12 +72,6 @@
     </a>
   </nav>
 
-  <input type="text" id="search" placeholder="Search products...">
-
-  <select id="category-filter">
-    <option value="">All</option>
-  </select>
-
 </header>
 
 <!-- BANNER -->
@@ -71,6 +79,15 @@
 
 <!-- SHOP NOW TEXT -->
 <div class="shop-now">Shop Now</div>
+
+<!-- MOVED FILTERS UNDER SHOP NOW -->
+<div class="filters">
+  <input type="text" id="search" placeholder="Search products...">
+
+  <select id="category-filter">
+    <option value="">All</option>
+  </select>
+</div>
 
 <main>
   <div id="product-list"></div>
