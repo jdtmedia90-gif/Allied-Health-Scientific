@@ -22,6 +22,7 @@
   --radius: 16px;
 }
 
+/* BASE */
 body {
   background:
     radial-gradient(circle at 20% 15%, rgba(255,90,26,0.22), transparent 45%),
@@ -30,7 +31,8 @@ body {
 
   color: var(--text);
   font-family: "Segoe UI", Inter, sans-serif;
-  line-height: 1.6;
+  line-height: 1.7;
+  font-size: 18px;
 }
 
 /* HEADER */
@@ -45,8 +47,8 @@ header {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;              /* tighter than before */
-  flex-wrap: nowrap;     /* prevents drifting apart */
+  gap: 8px;
+  flex-wrap: nowrap;
   width: 100%;
   margin: 0 auto;
   text-align: center;
@@ -59,7 +61,7 @@ header {
   display: block;
 }
 
-/* TEXT BLOCK — FIXED SPACING */
+/* TEXT BLOCK */
 .logo-container div {
   display: flex;
   flex-direction: column;
@@ -67,9 +69,9 @@ header {
   justify-content: center;
   text-align: center;
 
-  max-width: none;   /* IMPORTANT: removes spacing push */
   margin: 0;
   padding: 0;
+  max-width: none;
 }
 
 /* TITLE */
@@ -79,8 +81,8 @@ header {
   margin: 0;
   padding: 0;
   color: #ffffff;
+  line-height: 1.1;
   text-align: center;
-  line-height: 1.1; /* tighter vertical spacing */
   text-shadow:
     0 0 18px rgba(255,90,26,0.4),
     0 0 40px rgba(255,43,26,0.2);
@@ -88,9 +90,9 @@ header {
 
 /* SUBTEXT */
 .logo-container div div {
-  margin-top: 2px; /* tightened */
-  text-align: center;
+  margin-top: 2px;
   color: var(--muted);
+  text-align: center;
 }
 
 /* NAV */
@@ -106,6 +108,7 @@ header {
   color: var(--muted);
   text-decoration: none;
   font-weight: 600;
+  font-size: 1.05rem;
 }
 
 /* BANNER */
@@ -115,7 +118,7 @@ header {
   display: block;
 }
 
-/* SHOP */
+/* SHOP TITLE */
 .shop-now {
   text-align: center;
   font-size: 56px;
@@ -157,10 +160,61 @@ button {
   background: linear-gradient(135deg, var(--ember), var(--fire));
   border: none;
   color: white;
-  padding: 11px 16px;
+  padding: 12px 18px;
   border-radius: 12px;
   font-weight: 700;
   cursor: pointer;
+}
+
+/* SECTION BASE (ABOUT + CONTACT) */
+.section,
+.section.highlight {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  margin-bottom: 22px;
+  box-shadow: var(--shadow);
+}
+
+.section p {
+  font-size: 1.2rem;
+  line-height: 1.9;
+}
+
+/* CART */
+#cart-items {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.cart-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
+
+.cart-item h4 {
+  font-size: 1.3rem;
+  margin-bottom: 6px;
+}
+
+.cart-item p {
+  color: var(--muted);
+}
+
+/* INPUTS */
+input {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 1rem;
 }
 
 /* REVIEWS */
@@ -173,34 +227,23 @@ button {
 .reviews-section h2 {
   font-size: 2.5rem;
   margin-bottom: 25px;
-  color: #fff;
 }
 
-/* GRID */
 .reviews-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 24px;
-  max-width: 1400px;
-  margin: 0 auto;
 }
 
-/* REVIEWS IMAGES */
 .reviews-grid img {
   width: 100%;
-  height: auto;
-  object-fit: contain;
-
-  padding: 12px;
   border-radius: 14px;
   background: #0c0c0f;
   border: 1px solid var(--border);
-
   transition: transform 0.25s ease, box-shadow 0.25s ease;
-  transform-origin: center;
 }
 
-/* ZOOM (UNCHANGED FROM YOUR LAST REQUEST) */
+/* ZOOM (UNCHANGED) */
 .reviews-grid img:hover {
   transform: scale(1.60);
   box-shadow: 0 45px 110px rgba(0,0,0,0.95);
@@ -209,6 +252,9 @@ button {
 
 /* MOBILE */
 @media (max-width: 768px) {
+  body {
+    font-size: 16px;
+  }
 
   .logo-container {
     flex-direction: column;
@@ -216,11 +262,11 @@ button {
     flex-wrap: wrap;
   }
 
-  .reviews-grid {
-    grid-template-columns: 1fr;
-  }
-
   .reviews-grid img:hover {
     transform: scale(1.2);
+  }
+
+  .shop-now {
+    font-size: 38px;
   }
 }
